@@ -14,20 +14,30 @@ from devengers_engine.database.repository import (
     SendLogRepository,
     CampaignRepository,
 )
+from contextlib import asynccontextmanager
 from devengers_engine.parsers.extractor import FileExtractor
 from devengers_engine.templates.engine import template_engine
 from devengers_engine.deliverability.spam_checker import SpamChecker
 from devengers_engine.deliverability.dns_advisor import DNSAdvisor
 from devengers_engine.dispatcher.sender import dispatcher
 from devengers_engine.dispatcher.quota_sync import DynamicQuotaManager
+from devengers_engine.scheduler.service import scheduler_service
 
-# Initialize Database on app startup
-init_db()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize DB & Start 18:00 IST Background Dispatcher
+    init_db()
+    scheduler_service.start()
+    yield
+    scheduler_service.stop()
+
 
 app = FastAPI(
     title="Devengers Mail Engine",
     description="High-deliverability, quota-aware, deduplicating email dispatcher for devengers.org",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 STATIC_DIR = Path(__file__).parent / "static"

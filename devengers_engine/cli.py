@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -25,8 +26,8 @@ def main():
 
     # Command: web
     web_parser = subparsers.add_parser("web", help="Launch the interactive web dashboard")
-    web_parser.add_argument("--host", default="127.0.0.1", help="Host interface (default: 127.0.0.1)")
-    web_parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
+    web_parser.add_argument("--host", default=os.environ.get("HOST", "0.0.0.0"), help="Host interface (default: 0.0.0.0)")
+    web_parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8000)), help="Port to listen on (default: 8000 or $PORT)")
     web_parser.add_argument("--reload", action="store_true", help="Enable hot reload")
 
     # Command: import

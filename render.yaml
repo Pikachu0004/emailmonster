@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: devengers-email-engine
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py web
+    envVars:
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USE_SSL
+        value: "false"
+      - key: SMTP_USE_TLS
+        value: "true"
+      - key: SENDER_NAME
+        value: Devengers Events
+      - key: SENDER_EMAIL
+        value: event@devengers.org
+      - key: REPLY_TO_EMAIL
+        value: support@devengers.org
+      - key: DAILY_SEND_LIMIT
+        value: "300"
+      - key: OTP_RESERVE_BUFFER
+        value: "10"
+      - key: DRY_RUN
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false

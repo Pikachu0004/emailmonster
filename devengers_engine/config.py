@@ -1,7 +1,21 @@
+import os
 from pathlib import Path
 from typing import Optional
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _resolve_default_db() -> str:
+    # If /data persistent volume is mounted (e.g. Railway / Render / Fly), store permanently
+    if Path("/data").exists() and os.access("/data", os.W_OK):
+        return "/data/devengers_mail.db"
+    return "devengers_mail.db"
+
+
+def _resolve_default_uploads() -> str:
+    if Path("/data").exists() and os.access("/data", os.W_OK):
+        return "/data/uploads"
+    return "uploads"
 
 
 class Settings(BaseSettings):
@@ -37,8 +51,8 @@ class Settings(BaseSettings):
     batch_pause_seconds: float = Field(default=30.0, description="Breather duration between batches")
 
     # Storage Paths
-    database_path: str = Field(default="devengers_mail.db", description="Path to SQLite database")
-    upload_dir: str = Field(default="uploads", description="Directory for uploaded candidate files")
+    database_path: str = Field(default_factory=_resolve_default_db, description="Path to SQLite database")
+    upload_dir: str = Field(default_factory=_resolve_default_uploads, description="Directory for uploaded candidate files")
 
     # Operational Modes
     dry_run: bool = Field(default=False, description="Simulate sending without contacting SMTP")
