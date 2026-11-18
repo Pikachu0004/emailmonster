@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.devengers.mailengine</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/macbook/Code Kishan Project/Email Bot</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/macbook/Code Kishan Project/Email Bot/venv/bin/python3</string>
+        <string>run.py</string>
+        <string>send</string>
+        <string>--limit</string>
+        <string>300</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>18</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/macbook/Code Kishan Project/Email Bot/logs/daily_send.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/macbook/Code Kishan Project/Email Bot/logs/daily_send.error.log</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

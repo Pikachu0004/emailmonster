@@ -53,6 +53,12 @@ def main():
     test_parser.add_argument("--to", required=True, help="Recipient email address")
     test_parser.add_argument("--name", default="Test Member", help="Recipient Name")
 
+    # Command: daemon
+    daemon_parser = subparsers.add_parser("daemon", help="Run in continuous background daemon mode, firing daily at specified time (default 18:00 IST)")
+    daemon_parser.add_argument("--time", default="18:00", help="Daily trigger time in HH:MM (default: 18:00)")
+    daemon_parser.add_argument("--template", default="event_invite", help="Template name")
+    daemon_parser.add_argument("--limit", type=int, default=300, help="Max emails per day (auto-capped at daily quota)")
+
     # Command: dns
     subparsers.add_parser("dns", help="Display Spaceship DNS records required for Zoho Mail deliverability")
 
@@ -176,6 +182,80 @@ def main():
             print(f"✓ Test email sent successfully! Message-ID: {msg_id}")
         else:
             print(f"❌ Test email failed: {err}")
+
+    elif args.command == "daemon":
+        import time
+        from datetime import datetime, timedelta
+
+        try:
+            target_hour, target_min = map(int, args.time.split(":"))
+        except ValueError:
+            print("❌ Invalid time format. Please use HH:MM (e.g. 18:00)")
+            sys.exit(1)
+
+        print(f"\n========================================================")
+        print(f"        DEVENGERS MAIL ENGINE - DAILY DAEMON            ")
+        print(f"========================================================")
+        print(f"Target Schedule:      Every day at {args.time} IST")
+        print(f"Batch Limit:          {args.limit} emails / day (Zoho Free Tier)")
+        print(f"Sender:               {settings.formatted_from}")
+        print(f"Template:             {args.template}")
+        print(f"Operational Mode:     {'DRY RUN (Simulated)' if settings.dry_run else 'LIVE ZOHO SMTP'}")
+        print(f"Press Ctrl+C to terminate daemon gracefully.")
+        print(f"========================================================\n")
+
+        while True:
+            now = datetime.now()
+            target_today = now.replace(hour=target_hour, minute=target_min, second=0, microsecond=0)
+            if now >= target_today:
+                next_run = target_today + timedelta(days=1)
+            else:
+                next_run = target_today
+
+            wait_seconds = max(0.0, (next_run - now).total_seconds())
+            hours_left = int(wait_seconds // 3600)
+            mins_left = int((wait_seconds % 3600) // 60)
+            secs_left = int(wait_seconds % 60)
+
+            print(f"⏰ Next dispatch scheduled for: {next_run.strftime('%Y-%m-%d %H:%M:%S')} (in {hours_left}h {mins_left}m {secs_left}s)")
+            
+            try:
+                time.sleep(wait_seconds)
+            except KeyboardInterrupt:
+                print("\n🛑 Daemon stopped by user.")
+                break
+
+            print(f"\n🚀 [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Triggering daily batch...")
+            remaining = SendLogRepository.get_remaining_daily_quota()
+            if remaining <= 0:
+                print(f"⚠️ Daily quota of {settings.daily_send_limit} already reached today. Sleeping until tomorrow.")
+                time.sleep(60)
+                continue
+
+            effective_limit = min(args.limit, remaining)
+            candidates = ContactRepository.get_unemailed_contacts(limit=effective_limit)
+
+            if not candidates:
+                print("✓ All contacts in database have already been emailed! Sleeping until next schedule.")
+                time.sleep(60)
+                continue
+
+            print(f"⚡ Dispatching to next {len(candidates)} members in FIFO sequence...")
+            campaign_id = CampaignRepository.create_campaign(
+                name=f"Daemon {datetime.now().strftime('%Y-%m-%d')} Batch",
+                subject=f"Special Invitation | Devengers",
+                template_name=args.template,
+                total_queued=len(candidates),
+            )
+
+            result = dispatcher.run_queue_dispatch(
+                campaign_id=campaign_id,
+                template_name=args.template,
+                limit=effective_limit,
+            )
+            print(f"✓ Daily run finished: {result['message']}\n")
+            # Sleep 60s so it doesn't immediately re-trigger in the same minute
+            time.sleep(60)
 
     elif args.command == "dns":
         guide = DNSAdvisor.get_spaceship_records_guide()
