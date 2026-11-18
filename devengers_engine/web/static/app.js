@@ -60,14 +60,14 @@ async function fetchStats() {
       smtpBadge.innerText = "🛡️ Dry-Run Mode Active";
     } else if (data.smtp.status === "connected") {
       smtpBadge.className = "badge badge-connected";
-      smtpBadge.innerText = "⚡ Zoho SMTP Connected";
+      smtpBadge.innerText = `⚡ ${data.smtp.provider || "SMTP"} Connected`;
     } else {
       smtpBadge.className = "badge badge-warning";
-      smtpBadge.innerText = "⚠️ Zoho Auth Needed";
+      smtpBadge.innerText = "⚠️ SMTP Key Needed";
     }
 
     if (document.getElementById("cfg-smtp-host")) {
-      document.getElementById("cfg-smtp-host").innerText = `${data.smtp.host}:${data.smtp.port}`;
+      document.getElementById("cfg-smtp-host").innerText = `${data.smtp.provider || data.smtp.host}`;
     }
   } catch (err) {
     console.error("Failed to fetch stats:", err);

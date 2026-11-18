@@ -114,6 +114,7 @@ async def get_stats():
         "smtp": {
             "status": "connected" if smtp_ok else "warning",
             "message": smtp_msg,
+            "provider": settings.provider_name,
             "host": settings.smtp_host,
             "port": settings.smtp_port,
             "user": settings.smtp_user,

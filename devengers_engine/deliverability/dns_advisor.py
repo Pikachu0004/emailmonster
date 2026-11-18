@@ -3,23 +3,27 @@ from typing import Dict, Any, List
 
 
 class DNSAdvisor:
-    """Provides DNS configuration standards and diagnostics for devengers.org on Spaceship + Zoho."""
+    """Provides DNS configuration standards and diagnostics for devengers.org on Spaceship + Brevo (300/day) + Zoho Mail."""
 
     DOMAIN = "devengers.org"
 
     @classmethod
     def get_spaceship_records_guide(cls) -> Dict[str, Any]:
         """
-        Returns exact DNS records that must be present in Spaceship Advanced DNS
-        for Zoho Mail to achieve 100% Gmail and Yahoo deliverability without spam folder diversion.
+        Returns exact DNS records that must be present in Spaceship Advanced DNS:
+        - Incoming Mail & Inboxes: Zoho Mail (Free Tier)
+        - Outgoing 300/day Automation: Brevo SMTP Relay (Free Forever Tier)
         """
         return {
             "domain": cls.DOMAIN,
+            "architecture": "Incoming Webmail hosted on Zoho Mail + Outgoing 300/day automated dispatch via Brevo SMTP",
             "instructions": [
                 "1. Log in to your Spaceship account dashboard.",
                 "2. Go to Domains -> Manage devengers.org -> Advanced DNS.",
-                "3. Add the MX records, SPF TXT record, DKIM TXT record, and DMARC TXT record shown below.",
-                "4. In Zoho Mail Admin Console -> Domains -> devengers.org, click 'Verify' on SPF and DKIM.",
+                "3. Ensure the Zoho MX records are added so you receive replies at support@devengers.org.",
+                "4. Add the combined SPF record below so Gmail recognizes both Brevo and Zoho.",
+                "5. In Brevo (Senders & Domains), copy the DKIM record and add it to Spaceship.",
+                "6. Add the DMARC TXT record for 100% Gmail and Yahoo deliverability compliance.",
             ],
             "records": [
                 {
@@ -27,49 +31,52 @@ class DNSAdvisor:
                     "host": "@",
                     "value": "mx.zoho.com (or mx.zoho.in if India region)",
                     "priority": 10,
-                    "ttl": "Automatic / 3600",
-                    "purpose": "Primary mail exchange route to Zoho",
+                    "purpose": "Primary incoming route: Delivers replies to support@devengers.org into Zoho Webmail",
                 },
                 {
                     "type": "MX",
                     "host": "@",
                     "value": "mx2.zoho.com (or mx2.zoho.in)",
                     "priority": 20,
-                    "ttl": "Automatic / 3600",
-                    "purpose": "Secondary mail exchange backup",
+                    "purpose": "Secondary Zoho MX backup",
                 },
                 {
                     "type": "MX",
                     "host": "@",
                     "value": "mx3.zoho.com (or mx3.zoho.in)",
                     "priority": 50,
-                    "ttl": "Automatic / 3600",
-                    "purpose": "Tertiary mail exchange backup",
+                    "purpose": "Tertiary Zoho MX backup",
                 },
                 {
                     "type": "TXT (SPF)",
                     "host": "@",
-                    "value": "v=spf1 include:zoho.com ~all",
-                    "purpose": "Crucial: Authorizes Zoho servers to send from @devengers.org without triggering Gmail SPF failure",
+                    "value": "v=spf1 include:spf.brevo.com include:zoho.com ~all",
+                    "purpose": "Crucial: Authorizes both Brevo (300/day outgoing) & Zoho without triggering Gmail SPF failure",
                 },
                 {
-                    "type": "TXT (DKIM)",
+                    "type": "TXT (DKIM - Brevo)",
+                    "host": "mail._domainkey",
+                    "value": "(Obtain DKIM TXT value from Brevo Dashboard -> Senders & Domains -> Authenticate Domain)",
+                    "purpose": "Crucial: Cryptographically signs outgoing emails from Brevo to ensure direct Inbox delivery",
+                },
+                {
+                    "type": "TXT (DKIM - Zoho)",
                     "host": "zoho._domainkey",
-                    "value": "(Obtain public key string from Zoho Mail Admin -> Email Configuration -> DKIM)",
-                    "purpose": "Crucial: Cryptographically signs emails to guarantee authenticity to Gmail & Outlook",
+                    "value": "(Optional: DKIM key from Zoho Mail Admin for direct webmail replies)",
+                    "purpose": "Authenticates replies sent directly through Zoho Webmail",
                 },
                 {
                     "type": "TXT (DMARC)",
                     "host": "_dmarc",
-                    "value": "v=DMARC1; p=none; rua=mailto:support@devengers.org; ruf=mailto:support@devengers.org; sp=none; adkim=r; aspf=r",
+                    "value": "v=DMARC1; p=none; rua=mailto:support@devengers.org; sp=none; adkim=r; aspf=r",
                     "purpose": "Enforces 2024+ Gmail & Yahoo bulk sender authentication requirement",
                 },
             ],
             "deliverability_tips": [
-                "Warm-up: Send to small batches first before reaching full 300/day.",
-                "Always keep bounce rates below 2% by cleaning uploaded lists.",
-                "Include a valid List-Unsubscribe header and clean plain-text alternative on every email.",
-                "Ensure sender 'event@devengers.org' matches the authenticated SMTP user.",
+                "Verify devengers.org inside Brevo (Senders & IP -> Domains) to achieve 100% inbox placement.",
+                "Always keep bounce rates below 2% by cleaning uploaded member lists.",
+                "The engine automatically attaches List-Unsubscribe and clean RFC plain-text alternatives.",
+                "Replies sent to support@devengers.org land directly in your free Zoho webmail inbox.",
             ],
         }
 

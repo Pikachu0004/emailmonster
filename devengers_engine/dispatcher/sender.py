@@ -38,15 +38,15 @@ class MailDispatcher:
         if settings.dry_run:
             return True, "Dry-run mode is active (credentials verification simulated successfully)."
 
-        if not settings.smtp_password or settings.smtp_password == "your_zoho_app_password_here":
-            return False, "SMTP password is not configured in .env. Please set your Zoho App-Specific Password."
+        if not settings.smtp_password or settings.smtp_password in ("your_zoho_app_password_here", "your_brevo_smtp_master_key"):
+            return False, "SMTP credentials are not configured in .env. Please set your SMTP username and password/key."
 
         try:
             server = self.create_smtp_connection()
             server.quit()
-            return True, f"Successfully authenticated with Zoho SMTP ({settings.smtp_host}:{settings.smtp_port}) as {settings.smtp_user}."
+            return True, f"Successfully authenticated with {settings.provider_name} ({settings.smtp_host}:{settings.smtp_port})."
         except smtplib.SMTPAuthenticationError as e:
-            return False, f"Zoho SMTP Authentication Failed (Code {e.smtp_code}): Please verify your App-Specific Password and that Two-Factor Auth uses an App Password."
+            return False, f"SMTP Authentication Failed (Code {e.smtp_code}): Please verify your SMTP credentials in .env."
         except (socket.timeout, socket.gaierror) as e:
             return False, f"Network/DNS error connecting to {settings.smtp_host}: {str(e)}"
         except Exception as e:

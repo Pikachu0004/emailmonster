@@ -1,112 +1,83 @@
 # ⚡ Devengers Mail Engine
 
-A production-grade, quota-aware, deduplicating email automation engine engineered for **devengers.org**. Built specifically for Zoho Mail's free tier with domain routing configured via Spaceship, strict 300/day sending protection, FIFO contact queueing, and enterprise deliverability standards to guarantee inbox landing in Gmail and Outlook.
+A production-grade, quota-aware, deduplicating email automation engine engineered for **devengers.org**. Built specifically to combine **Zoho Mail** (for incoming inboxes and reading replies) with **Brevo's Free SMTP Relay** (for guaranteed 300 free outgoing emails every day), strict FIFO contact queueing, and enterprise deliverability standards to guarantee inbox landing in Gmail and Outlook.
 
 ---
 
-## 🌟 Key Features
+## 🏗️ Architecture & How It Works
 
-1. **Strict 300/Day Quota Enforcement**:
-   - Accurately tracks daily email volume against Zoho Mail's free tier limit (300/day).
-   - Automatically pauses when the daily threshold is met and seamlessly resumes the following day.
-2. **Zero-Duplicate Guarantee & Strict FIFO Ordering**:
-   - Ingests contacts from Excel (`.xlsx`, `.xls`), CSV, and PDF documents.
-   - Enforces persistent database deduplication.
-   - Dispatches in strict first-to-last (FIFO) sequence: if you send to 300 members today, tomorrow's run automatically skips those 300 and starts at member 301.
-3. **Gmail & Outlook Spam Prevention**:
-   - **MIME Multipart/Alternative**: Full responsive HTML + clean RFC 2822 plain-text alternative.
-   - **Compliant Headers**: `List-Unsubscribe` (one-click header required by Gmail 2024+ guidelines), `Reply-To: support@devengers.org`, `From: "Devengers Events" <event@devengers.org>`, and custom RFC `Message-ID`.
-   - **Real-Time Spam Radar**: Heuristic scanner checking subject length, all-caps ratio, exclamation marks, and promotional trigger keywords.
-4. **Interactive Web Dashboard + Full CLI**:
-   - Modern glassmorphic Web UI with live queue progress bar, file upload preview, desktop/mobile previewer, and single-click test sending.
-   - Comprehensive command-line interface for terminal users and cron automations.
+* **Incoming Mailbox Hosting:** Hosted on **Zoho Mail (Free Tier)**. Any replies sent to `support@devengers.org` or `event@devengers.org` land directly in your Zoho Webmail / mobile app inbox.
+* **Outgoing 300/Day Automation:** Routed via **Brevo SMTP Relay** (`smtp-relay.brevo.com:587`), giving you a permanent allowance of **300 emails/day completely free** (no credit card required).
+* **Automated Schedule:** Runs automatically every single day at **6:00 PM IST (18:00)**.
+* **Strict FIFO Ordering & Deduplication:** Processes contacts in order from first to last (FIFO). If you upload 1,000 members and send 300 today, tomorrow's run automatically skips those 300 and starts at member 301.
 
 ---
 
 ## 🌐 Spaceship DNS Configuration for `devengers.org`
 
-To guarantee that your emails from `event@devengers.org` go directly to the inbox and never to the spam folder, enter these records into your **Spaceship Advanced DNS** panel:
+Add these exact records into your **Spaceship Advanced DNS** panel:
 
 | Record Type | Host | Value / Target | Priority | Purpose |
 |:---|:---|:---|:---:|:---|
-| **MX** | `@` | `mx.zoho.com` *(or `mx.zoho.in` for India)* | 10 | Primary Mail Exchange route to Zoho |
-| **MX** | `@` | `mx2.zoho.com` *(or `mx2.zoho.in`)* | 20 | Secondary Mail Exchange backup |
-| **MX** | `@` | `mx3.zoho.com` *(or `mx3.zoho.in`)* | 50 | Tertiary Mail Exchange backup |
-| **TXT (SPF)** | `@` | `v=spf1 include:zoho.com ~all` | — | **Crucial:** Authorizes Zoho servers to send from `@devengers.org` |
-| **TXT (DKIM)**| `zoho._domainkey` | *(Copy public key from Zoho Mail Admin &rarr; DKIM)* | — | **Crucial:** Cryptographically signs outgoing emails |
-| **TXT (DMARC)**| `_dmarc` | `v=DMARC1; p=none; rua=mailto:support@devengers.org; sp=none; adkim=r; aspf=r` | — | Enforces Gmail & Yahoo 2024 bulk sender rules |
+| **MX** | `@` | `mx.zoho.com` *(or `mx.zoho.in` if India)* | 10 | Routes incoming replies into Zoho Webmail |
+| **MX** | `@` | `mx2.zoho.com` *(or `mx2.zoho.in`)* | 20 | Secondary Zoho MX backup |
+| **MX** | `@` | `mx3.zoho.com` *(or `mx3.zoho.in`)* | 50 | Tertiary Zoho MX backup |
+| **TXT (SPF)** | `@` | `v=spf1 include:spf.brevo.com include:zoho.com ~all` | — | **Crucial:** Authorizes both Brevo (300/day outgoing) & Zoho without SPF errors |
+| **TXT (DKIM)**| `mail._domainkey` | *(Copy DKIM value from Brevo Dashboard &rarr; Senders & Domains)* | — | **Crucial:** Cryptographically signs outgoing emails |
+| **TXT (DMARC)**| `_dmarc` | `v=DMARC1; p=none; rua=mailto:support@devengers.org; sp=none; adkim=r; aspf=r` | — | Enforces Gmail & Yahoo 2024 bulk authentication |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Setup (2 Minutes)
 
-### 1. Configure Credentials (`.env`)
+### 1. Get Free Brevo SMTP Credentials
+1. Sign up for a free account at **[brevo.com](https://www.brevo.com/)** (no credit card needed).
+2. Go to **Senders & IP** &rarr; **Senders** &rarr; Add `event@devengers.org` (Name: "Devengers Events").
+3. Go to **SMTP & API** &rarr; **SMTP** &rarr; Generate an **SMTP Key**.
 
-Copy `.env.example` to `.env` (already created for you):
-```bash
-# Generate an App-Specific Password in Zoho:
-# Zoho Account -> Security -> App Passwords -> Generate
-SMTP_HOST=smtppro.zoho.in        # Use smtp.zoho.com if registered outside India
-SMTP_PORT=465
-SMTP_USE_SSL=true
-SMTP_USER=event@devengers.org
-SMTP_PASSWORD=your_zoho_app_password
+### 2. Configure Your `.env`
+Edit your `.env` file with your Brevo login and generated key:
+```env
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USE_SSL=false
+SMTP_USE_TLS=true
+SMTP_USER=your_brevo_login_email
+SMTP_PASSWORD=your_brevo_smtp_master_key
 
 SENDER_NAME="Devengers Events"
 SENDER_EMAIL=event@devengers.org
 REPLY_TO_EMAIL=support@devengers.org
 
-# Set DRY_RUN=false to enable real email transmission
+DAILY_SEND_LIMIT=300
 DRY_RUN=false
 ```
 
-### 2. Launch the Web Dashboard
-
+### 3. Activate the Daily 6:00 PM IST Automation
+To automatically dispatch the daily 300 emails at 6:00 PM IST without opening terminal every day:
 ```bash
-./venv/bin/python3 run.py web
+./scripts/setup_schedule.sh mac
 ```
-Open your browser at **`http://localhost:8000`**:
-- **Overview Tab**: Live quota meter showing `X / 300 Sent Today`, total ledger count, and SMTP health.
-- **Upload Tab**: Drag and drop your `.xlsx`, `.csv`, or `.pdf` file.
-- **Studio Tab**: Edit event details, choose templates, test spam score, and preview in desktop/mobile view.
-- **Dispatch Tab**: Run a single test email or trigger the automated batch dispatch with live progress bars.
+*(On Linux/servers, use `./scripts/setup_schedule.sh cron`)*.
 
 ---
 
-## 💻 CLI Commands
-
-The engine includes a complete command-line interface:
+## 💻 Manual Commands & Web Dashboard
 
 ```bash
-# 1. Check ledger counts and today's remaining Zoho quota
+# 1. Launch the Web Dashboard
+./venv/bin/python3 run.py web
+# (Open http://localhost:8000 to upload Excel/PDF files & view live progress)
+
+# 2. Check quota & unemailed contacts status
 ./venv/bin/python3 run.py status
 
-# 2. Import contacts from an Excel, CSV, or PDF file
+# 3. Import contacts from an Excel or PDF file
 ./venv/bin/python3 run.py import sample_members.xlsx
 
-# 3. Send a single verification test email
+# 4. Send a single test email to your Gmail
 ./venv/bin/python3 run.py test --to your_email@gmail.com
 
-# 4. Dispatch today's batch to unemailed members in FIFO order
-./venv/bin/python3 run.py send --template event_invite --limit 300
-
-# 5. Display Spaceship DNS records guide
-./venv/bin/python3 run.py dns
+# 5. Dispatch today's batch to the next 300 members in FIFO order
+./venv/bin/python3 run.py send --limit 300
 ```
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite verifying parsers, validators, templates, deliverability score, and the 300/day zero-duplicate logic:
-
-```bash
-./venv/bin/pytest tests/
-```
-
-All 15 automated test cases verify:
-- RFC 5322 email regex and sanitization.
-- Multi-format ingestion (`.xlsx`, `.csv`, `.pdf`).
-- Dynamic template rendering with plain-text alternative.
-- Anti-spam scoring and trigger keyword filtering.
-- Sequential FIFO queueing and zero-duplicate continuation across multiple days.

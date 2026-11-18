@@ -14,13 +14,13 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    # SMTP Server Settings (Zoho Mail)
-    smtp_host: str = Field(default="smtppro.zoho.in", description="Zoho SMTP Host")
-    smtp_port: int = Field(default=465, description="Zoho SMTP Port (465 SSL / 587 TLS)")
-    smtp_use_ssl: bool = Field(default=True, description="Connect via SSL (port 465)")
-    smtp_use_tls: bool = Field(default=False, description="Connect via STARTTLS (port 587)")
-    smtp_user: str = Field(default="event@devengers.org", description="Zoho Account Email")
-    smtp_password: str = Field(default="", description="Zoho App-Specific Password")
+    # SMTP Server Settings (Brevo 300/day Free Relay by default; supports Zoho / ZeptoMail)
+    smtp_host: str = Field(default="smtp-relay.brevo.com", description="SMTP Relay Host")
+    smtp_port: int = Field(default=587, description="SMTP Port (587 TLS / 465 SSL)")
+    smtp_use_ssl: bool = Field(default=False, description="Connect via SSL (port 465)")
+    smtp_use_tls: bool = Field(default=True, description="Connect via STARTTLS (port 587)")
+    smtp_user: str = Field(default="", description="SMTP Username / Login")
+    smtp_password: str = Field(default="", description="SMTP Password / Key")
 
     # Brand and Routing
     sender_name: str = Field(default="Devengers Events", description="Friendly sender name")
@@ -53,6 +53,15 @@ class Settings(BaseSettings):
     @property
     def formatted_from(self) -> str:
         return f"{self.sender_name} <{self.sender_email}>"
+
+    @property
+    def provider_name(self) -> str:
+        h = self.smtp_host.lower()
+        if "brevo" in h or "sendinblue" in h:
+            return "Brevo Relay (Free 300/day)"
+        elif "zoho" in h or "zeptomail" in h:
+            return "Zoho Mail / ZeptoMail"
+        return f"SMTP Relay ({self.smtp_host})"
 
     @property
     def db_file_path(self) -> Path:
