@@ -88,7 +88,7 @@ class AutomatedScheduler:
 
             campaign_id = CampaignRepository.create_campaign(
                 name=f"Autopilot {datetime.now().strftime('%Y-%m-%d')} Batch",
-                subject="Special Invitation | Devengers",
+                subject="Congratulations! You're Invited to Join DEVENGERS",
                 template_name="event_invite",
                 total_queued=len(candidates),
             )
@@ -96,6 +96,11 @@ class AutomatedScheduler:
             result = dispatcher.run_queue_dispatch(
                 campaign_id=campaign_id,
                 template_name="event_invite",
+                custom_subject="Congratulations {{first_name}}! You're Invited to Join DEVENGERS",
+                template_vars={
+                    "cta_url": "https://whatsapp.com/channel/0029VbCVGAd8KMql7Ie3ew43",
+                    "cta_text": "JOIN DEVENGERS NOW",
+                },
                 limit=safe_to_send,
             )
             logger.info(f"✓ [Scheduler] Finished: {result['message']}")

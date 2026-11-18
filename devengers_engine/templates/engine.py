@@ -40,8 +40,8 @@ class TemplateEngine:
             "event_date": context.get("event_date", "Upcoming"),
             "event_time": context.get("event_time", "6:00 PM IST"),
             "event_location": context.get("event_location", "Online / Discord & Google Meet"),
-            "cta_url": context.get("cta_url", "https://devengers.org"),
-            "cta_text": context.get("cta_text", "Confirm Your Attendance"),
+            "cta_url": context.get("cta_url") or "https://whatsapp.com/channel/0029VbCVGAd8KMql7Ie3ew43",
+            "cta_text": context.get("cta_text") or "JOIN DEVENGERS NOW",
             "custom_message": context.get("custom_message", ""),
             "extra_data": context.get("extra_data", {}),
             "sender_email": settings.sender_email,
@@ -59,9 +59,9 @@ class TemplateEngine:
         txt_file = f"{template_name}.txt"
 
         if not (TEMPLATES_DIR / html_file).exists():
-            html_file = "custom_wrapper.html"
+            html_file = "event_invite.html"
         if not (TEMPLATES_DIR / txt_file).exists():
-            txt_file = "custom_wrapper.txt"
+            txt_file = "event_invite.txt"
 
         html_template = self.env.get_template(html_file)
         html_rendered = html_template.render(ctx)
@@ -70,7 +70,7 @@ class TemplateEngine:
         text_rendered = txt_template.render(ctx)
 
         # Subject interpolation
-        raw_subject = custom_subject or context.get("subject") or f"Special Invitation for {ctx['first_name']} | Devengers"
+        raw_subject = custom_subject or context.get("subject") or f"Congratulations {ctx['first_name']}! You're Invited to Join DEVENGERS"
         subject_template = self.env.from_string(raw_subject)
         subject_rendered = subject_template.render(ctx)
 

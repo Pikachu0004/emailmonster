@@ -149,16 +149,16 @@
             <div class="form-group">
               <label class="form-label">Template Preset</label>
               <select id="tpl-select" class="form-select" onchange="refreshPreview()">
-                <option value="event_invite">Tech Event / Hackathon Invitation (Recommended)</option>
+                <option value="event_invite" selected>DEVENGERS WhatsApp Channel Invitation (Default)</option>
+                <option value="custom_wrapper">Custom Announcement</option>
                 <option value="community_update">Community Update / Newsletter</option>
                 <option value="certificate">Certificate & Appreciation Letter</option>
-                <option value="custom_wrapper">Custom Announcement</option>
               </select>
             </div>
 
             <div class="form-group">
               <label class="form-label">Subject Line</label>
-              <input type="text" id="tpl-subject" class="form-input" value="Exclusive Invitation for {{first_name}} | Devengers" oninput="debouncePreview()">
+              <input type="text" id="tpl-subject" class="form-input" value="Congratulations {{first_name}}! You're Invited to Join DEVENGERS" oninput="debouncePreview()">
               <div style="margin-top: 6px;">
                 <span style="font-size: 11px; color: var(--text-muted);">Quick tags:</span>
                 <span class="tag-pill" onclick="insertTag('{{first_name}}')">{{first_name}}</span>
@@ -169,37 +169,29 @@
 
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">Event / Topic Name</label>
-                <input type="text" id="tpl-event-name" class="form-input" value="Devengers AI & Web3 Summit 2026" oninput="debouncePreview()">
+                <label class="form-label">Topic / Headline</label>
+                <input type="text" id="tpl-event-name" class="form-input" value="Join DEVENGERS Community" oninput="debouncePreview()">
               </div>
               <div class="form-group">
-                <label class="form-label">Date</label>
-                <input type="text" id="tpl-event-date" class="form-input" value="Saturday, November 28, 2026" oninput="debouncePreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Time</label>
-                <input type="text" id="tpl-event-time" class="form-input" value="6:00 PM - 8:30 PM IST" oninput="debouncePreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Location / Platform</label>
-                <input type="text" id="tpl-event-location" class="form-input" value="Online via Google Meet & Discord" oninput="debouncePreview()">
+                <label class="form-label">CTA Button Link (WhatsApp)</label>
+                <input type="text" id="tpl-cta-url" class="form-input" value="https://whatsapp.com/channel/0029VbCVGAd8KMql7Ie3ew43" oninput="debouncePreview()">
               </div>
             </div>
 
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">CTA Button Link</label>
-                <input type="text" id="tpl-cta-url" class="form-input" value="https://devengers.org/rsvp" oninput="debouncePreview()">
+                <label class="form-label">CTA Button Label</label>
+                <input type="text" id="tpl-cta-text" class="form-input" value="JOIN DEVENGERS NOW" oninput="debouncePreview()">
               </div>
               <div class="form-group">
-                <label class="form-label">CTA Button Label</label>
-                <input type="text" id="tpl-cta-text" class="form-input" value="Confirm Your Attendance" oninput="debouncePreview()">
+                <label class="form-label">Community Slogan</label>
+                <input type="text" id="tpl-event-location" class="form-input" value="DEVENGERS — Learn • Build • Lead" oninput="debouncePreview()">
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Custom Message Note</label>
-              <textarea id="tpl-custom-message" class="form-textarea" placeholder="Add personalized remarks or special instructions..." oninput="debouncePreview()">We're holding an exclusive seat for you. Get ready for hands-on demos, keynote sessions, and networking with top engineers.</textarea>
+              <label class="form-label">Intro Note</label>
+              <textarea id="tpl-custom-message" class="form-textarea" placeholder="Add personalized remarks or special instructions..." oninput="debouncePreview()">We've reached out to you because we believe you have an interest in technology, innovation, and the ever-evolving world of tech.</textarea>
             </div>
 
             <!-- Spam Radar Card -->

@@ -1,32 +1,37 @@
-DEVENGERS OFFICIAL INVITATION: {{ event_name }}
-============================================================
+Hi {{ first_name }},
 
-Hello {{ first_name }},
+Congratulations! You're Invited to Join DEVENGERS!
 
-We are thrilled to formally invite you to the upcoming {{ event_name }}. Our team has curated an inspiring session designed to share valuable insights, connect you with fellow engineers and builders, and push tech frontiers forward.
+We've reached out to you because we believe you have an interest in technology, innovation, and the ever-evolving world of tech.
 
-{% if custom_message %}
---- NOTE ---
-{{ custom_message }}
-------------
-{% endif %}
+That's why we'd love to welcome you to DEVENGERS — a growing tech community designed for students, developers, aspiring engineers, and technology enthusiasts like you.
 
-EVENT DETAILS:
-- Event: {{ event_name }}
-- Date: {{ event_date }}
-- Time: {{ event_time }}
-- Location / Platform: {{ event_location }}
+What's waiting for you at DEVENGERS?
+💻 Tech & Development — Programming, Coding & Software Development
+🤖 AI & Innovation — Artificial Intelligence, Machine Learning & Generative AI
+🏆 Opportunities — Hackathons, Coding Competitions & Tech Events
+💼 Career Growth — Jobs, Internships & Career Opportunities
+🚀 Build & Explore — Projects, Open Source & Developer Resources
+🎓 Learn & Grow — Skills, Certifications & Learning Resources
 
-CONFIRM YOUR ATTENDANCE:
-{{ cta_url }}
+Your next opportunity could be just one update away!
+Ready to make your tech journey more exciting?
 
-Seats are limited, so please reserve early to guarantee access.
+Join the official DEVENGERS WhatsApp Channel today!
 
-============================================================
-SUPPORT & ASSISTANCE:
-If you have any questions, simply reply directly to this email or reach us at: {{ reply_to_email }}
+[JOIN DEVENGERS NOW]
+{{ cta_url or 'https://whatsapp.com/channel/0029VbCVGAd8KMql7Ie3ew43' }}
 
-Sender: {{ sender_name }} <{{ sender_email }}>
-(c) {{ current_year }} Devengers. All rights reserved.
+Be part of the community. Stay ahead with opportunities, discover new technologies, and keep building your future.
 
-To opt out or unsubscribe from future announcements, reply with subject "Unsubscribe" or email {{ reply_to_email }}.
+DEVENGERS — Learn • Build • Lead.
+
+See you inside!
+
+Best Regards,
+Team DEVENGERS
+Technology | Innovation | Opportunities
+Collaboration & Sponsorship: event@devengers.org
+Support: support@devengers.org
+
+You are receiving this invitation because we believe you may be interested in technology and developer opportunities. If you don't wish to receive further emails, you can unsubscribe by replying with "Unsubscribe" or emailing support@devengers.org.

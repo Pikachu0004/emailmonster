@@ -171,16 +171,21 @@ function debouncePreview() {
 }
 
 function getComposerValues() {
+  const getVal = (id, fallback = "") => {
+    const el = document.getElementById(id);
+    return el ? el.value : fallback;
+  };
+
   return {
-    template_name: document.getElementById("tpl-select").value,
-    subject: document.getElementById("tpl-subject").value,
-    event_name: document.getElementById("tpl-event-name").value,
-    event_date: document.getElementById("tpl-event-date").value,
-    event_time: document.getElementById("tpl-event-time").value,
-    event_location: document.getElementById("tpl-event-location").value,
-    cta_url: document.getElementById("tpl-cta-url").value,
-    cta_text: document.getElementById("tpl-cta-text").value,
-    custom_message: document.getElementById("tpl-custom-message").value,
+    template_name: getVal("tpl-select", "event_invite"),
+    subject: getVal("tpl-subject", "Congratulations {{first_name}}! You're Invited to Join DEVENGERS"),
+    event_name: getVal("tpl-event-name", "Join DEVENGERS Community"),
+    event_date: getVal("tpl-event-date", "Upcoming"),
+    event_time: getVal("tpl-event-time", "6:00 PM IST"),
+    event_location: getVal("tpl-event-location", "DEVENGERS — Learn • Build • Lead"),
+    cta_url: getVal("tpl-cta-url", "https://whatsapp.com/channel/0029VbCVGAd8KMql7Ie3ew43"),
+    cta_text: getVal("tpl-cta-text", "JOIN DEVENGERS NOW"),
+    custom_message: getVal("tpl-custom-message", "We've reached out to you because we believe you have an interest in technology, innovation, and the ever-evolving world of tech."),
     sample_name: "Kishan Sharma",
     sample_email: "kishan@devengers.org",
   };
