@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -100,7 +101,17 @@ class DispatchRequest(BaseModel):
     limit: Optional[int] = 300
 
 
-@app.get("/health")
+class CustomContactItem(BaseModel):
+    email: str
+    name: Optional[str] = ""
+
+
+class AddCustomContactsRequest(BaseModel):
+    contacts: Optional[List[CustomContactItem]] = None
+    raw_text: Optional[str] = None
+
+
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     try:
         now_ist = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S IST")
@@ -113,11 +124,12 @@ async def health_check():
         "status": "online",
         "service": "Devengers Mail Engine",
         "time_ist": now_ist,
-        "scheduler": "active",
+        "scheduler": "active (auto 6pm)" if settings.auto_schedule_enabled else "manual_on_demand",
+        "mode": "manual_on_demand",
     }
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def serve_index():
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():
@@ -182,6 +194,85 @@ async def upload_file(file: UploadFile = File(...)):
         "existing_updated": updated,
         "warnings": warnings[:10],
         "preview_sample": contacts[:8],
+    }
+
+
+@app.post("/api/contacts/custom")
+async def add_custom_contacts(req: AddCustomContactsRequest):
+    """
+    Allows adding custom individual contacts or bulk text/pasted lists of emails.
+    Validates syntax, formats names, and inserts with zero-duplicate protection.
+    """
+    from devengers_engine.parsers.validator import (
+        validate_and_normalize_contact,
+        is_valid_email,
+        sanitize_email,
+        format_proper_name,
+        extract_first_name,
+    )
+
+    to_process: List[Dict[str, Any]] = []
+
+    if req.contacts:
+        for c in req.contacts:
+            if c.email and c.email.strip():
+                to_process.append({"email": c.email.strip(), "name": c.name or ""})
+
+    if req.raw_text:
+        raw_lines = req.raw_text.replace("\r", "\n").split("\n")
+        for line in raw_lines:
+            line = line.strip()
+            if not line:
+                continue
+            # Split by comma or semicolon
+            tokens = [t.strip() for t in re.split(r"[,;]", line) if t.strip()]
+            for token in tokens:
+                match = re.search(r"^(.*?)(?:<([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>)", token)
+                if match:
+                    name_part = match.group(1).strip().strip('"\'')
+                    email_part = match.group(2).strip()
+                    to_process.append({"email": email_part, "name": name_part})
+                else:
+                    found_emails = re.findall(r"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", token)
+                    if found_emails:
+                        for em in found_emails:
+                            to_process.append({"email": em, "name": ""})
+
+    if not to_process:
+        raise HTTPException(
+            status_code=400,
+            detail="No email addresses provided. Enter at least one valid email.",
+        )
+
+    valid_contacts: List[Dict[str, Any]] = []
+    invalid_emails: List[str] = []
+
+    for item in to_process:
+        item["source_file"] = "custom_entry"
+        ok, norm, err = validate_and_normalize_contact(item)
+        if ok and norm:
+            valid_contacts.append(norm)
+        else:
+            invalid_emails.append(item.get("email", ""))
+
+    if not valid_contacts:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No valid email addresses found. Invalid inputs: {', '.join(invalid_emails[:5])}",
+        )
+
+    inserted, updated = ContactRepository.bulk_upsert(valid_contacts, source_file="custom_entry")
+    summary = ContactRepository.get_contacts_summary()
+
+    return {
+        "success": True,
+        "total_parsed": len(to_process),
+        "valid_contacts": len(valid_contacts),
+        "newly_inserted": inserted,
+        "existing_updated": updated,
+        "invalid_count": len(invalid_emails),
+        "summary": summary,
+        "preview_sample": valid_contacts[:10],
     }
 
 

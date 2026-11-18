@@ -135,24 +135,7 @@ async function uploadFileObj(file) {
       </div>
     `;
 
-    // Render Preview Table
-    if (data.preview_sample && data.preview_sample.length) {
-      const card = document.getElementById("upload-preview-card");
-      const tbody = document.getElementById("upload-preview-body");
-      tbody.innerHTML = "";
-      data.preview_sample.forEach(c => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td><strong style="color: var(--dark);">${c.name}</strong></td>
-          <td>${c.first_name}</td>
-          <td><code style="color: var(--dark); font-weight: 700; background: var(--gray-card); padding: 2px 6px; border-radius: 4px;">${c.email}</code></td>
-          <td><span style="font-size: 12px; color: var(--gray-muted);">${JSON.stringify(c.extra_data)}</span></td>
-        `;
-        tbody.appendChild(row);
-      });
-      card.style.display = "block";
-    }
-
+    renderPreviewTable(data.preview_sample);
     fetchStats();
   } catch (err) {
     statusEl.innerHTML = `
@@ -161,6 +144,114 @@ async function uploadFileObj(file) {
       </div>
     `;
   }
+}
+
+async function addSingleCustomContact() {
+  const nameInput = document.getElementById("custom-single-name");
+  const emailInput = document.getElementById("custom-single-email");
+  const statusEl = document.getElementById("custom-contact-status");
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    statusEl.style.display = "block";
+    statusEl.innerHTML = `<div style="padding: 10px 14px; background: #ffccc7; border: 2px solid var(--gray-border); border-radius: 10px; color: var(--dark); font-weight: 700;">Please enter an email address.</div>`;
+    return;
+  }
+
+  statusEl.style.display = "block";
+  statusEl.innerHTML = `<span style="color: var(--dark); font-weight: 600;">Adding contact...</span>`;
+
+  try {
+    const res = await fetch("/api/contacts/custom", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contacts: [{ name: name, email: email }]
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Failed to add contact");
+
+    statusEl.innerHTML = `
+      <div style="padding: 12px 16px; background-color: var(--primary-lime); border: 2px solid var(--gray-border); border-radius: 12px; color: var(--dark); box-shadow: 0px 3px 0px var(--gray-border); font-size: 13px;">
+        <strong>✓ Contact Added:</strong> <code>${email}</code> added to the queue!
+      </div>
+    `;
+
+    nameInput.value = "";
+    emailInput.value = "";
+    renderPreviewTable(data.preview_sample);
+    fetchStats();
+  } catch (err) {
+    statusEl.innerHTML = `
+      <div style="padding: 12px 16px; background-color: #ffccc7; border: 2px solid var(--gray-border); border-radius: 12px; color: var(--dark); box-shadow: 0px 3px 0px var(--gray-border); font-size: 13px;">
+        <strong>✗ Error:</strong> ${err.message}
+      </div>
+    `;
+  }
+}
+
+async function addBulkCustomContacts() {
+  const textarea = document.getElementById("custom-bulk-emails");
+  const statusEl = document.getElementById("custom-contact-status");
+  const rawText = textarea.value.trim();
+
+  if (!rawText) {
+    statusEl.style.display = "block";
+    statusEl.innerHTML = `<div style="padding: 10px 14px; background: #ffccc7; border: 2px solid var(--gray-border); border-radius: 10px; color: var(--dark); font-weight: 700;">Please paste or type at least one email address.</div>`;
+    return;
+  }
+
+  statusEl.style.display = "block";
+  statusEl.innerHTML = `<span style="color: var(--dark); font-weight: 600;">Parsing and adding emails...</span>`;
+
+  try {
+    const res = await fetch("/api/contacts/custom", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ raw_text: rawText }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Failed to add contacts");
+
+    statusEl.innerHTML = `
+      <div style="padding: 12px 16px; background-color: var(--primary-lime); border: 2px solid var(--gray-border); border-radius: 12px; color: var(--dark); box-shadow: 0px 3px 0px var(--gray-border); font-size: 13px;">
+        <strong>✓ Success:</strong> Added <strong>${data.newly_inserted}</strong> new emails to queue! 
+        (Updated: ${data.existing_updated}, Invalid: ${data.invalid_count})
+      </div>
+    `;
+
+    textarea.value = "";
+    renderPreviewTable(data.preview_sample);
+    fetchStats();
+  } catch (err) {
+    statusEl.innerHTML = `
+      <div style="padding: 12px 16px; background-color: #ffccc7; border: 2px solid var(--gray-border); border-radius: 12px; color: var(--dark); box-shadow: 0px 3px 0px var(--gray-border); font-size: 13px;">
+        <strong>✗ Error:</strong> ${err.message}
+      </div>
+    `;
+  }
+}
+
+function renderPreviewTable(contacts) {
+  if (!contacts || !contacts.length) return;
+  const card = document.getElementById("upload-preview-card");
+  const tbody = document.getElementById("upload-preview-body");
+  if (!card || !tbody) return;
+  tbody.innerHTML = "";
+  contacts.forEach(c => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><strong style="color: var(--dark);">${c.name || '-'}</strong></td>
+      <td>${c.first_name || '-'}</td>
+      <td><code style="color: var(--dark); font-weight: 700; background: var(--gray-card); padding: 2px 6px; border-radius: 4px;">${c.email}</code></td>
+      <td><span style="font-size: 12px; color: var(--gray-muted);">${c.source_file || 'custom_entry'}</span></td>
+    `;
+    tbody.appendChild(row);
+  });
+  card.style.display = "block";
 }
 
 function debouncePreview() {

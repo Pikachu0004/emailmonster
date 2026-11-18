@@ -26,7 +26,7 @@
   <!-- Navigation Tabs -->
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview &amp; Quota</button>
-    <button class="tab-btn" onclick="switchTab('upload')">📁 Upload File (Excel / PDF / CSV)</button>
+    <button class="tab-btn" onclick="switchTab('upload')">👥 Contacts &amp; Custom Emails</button>
     <button class="tab-btn" onclick="switchTab('studio')">✍️ Template Studio &amp; Anti-Spam</button>
     <button class="tab-btn" onclick="switchTab('dispatch')">🚀 Dispatch &amp; Live Feed</button>
     <button class="tab-btn" onclick="switchTab('dns')">🌐 Spaceship DNS Setup</button>
@@ -91,7 +91,7 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
           <div style="padding: 16px; background: #ffffff; border-radius: 14px; border: 1px solid var(--gray-border); box-shadow: 0px 3px 0px var(--gray-border);">
             <div style="font-size: 11px; color: var(--gray-muted); text-transform: uppercase; font-weight: 700;">From Address</div>
-            <div style="font-size: 14px; font-weight: 800; color: var(--dark); margin-top: 4px;">Devengers Events &lt;event@devengers.org&gt;</div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--dark); margin-top: 4px;">Team DEVENGERS &lt;event@devengers.org&gt;</div>
           </div>
           <div style="padding: 16px; background: #ffffff; border-radius: 14px; border: 1px solid var(--gray-border); box-shadow: 0px 3px 0px var(--gray-border);">
             <div style="font-size: 11px; color: var(--gray-muted); text-transform: uppercase; font-weight: 700;">Reply-To Destination</div>
@@ -102,46 +102,91 @@
             <div style="font-size: 14px; font-weight: 800; color: var(--dark); margin-top: 4px;">10 Credits Strictly Reserved</div>
           </div>
           <div style="padding: 16px; background: #ffffff; border-radius: 14px; border: 1px solid var(--gray-border); box-shadow: 0px 3px 0px var(--gray-border);">
-            <div style="font-size: 11px; color: var(--gray-muted); text-transform: uppercase; font-weight: 700;">Outgoing Relay (300/day Free)</div>
-            <div id="cfg-smtp-host" style="font-size: 14px; font-weight: 800; color: var(--dark); margin-top: 4px;">smtp-relay.brevo.com:587</div>
+            <div style="font-size: 11px; color: var(--gray-muted); text-transform: uppercase; font-weight: 700;">Schedule Mode</div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--dark); margin-top: 4px;">⚡ Manual On-Demand Only</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 2. UPLOAD TAB -->
+    <!-- 2. CONTACTS TAB -->
     <section id="tab-upload" class="tab-panel">
       <div class="section-heading-wrapper">
-        <span class="section-tag">Import Contacts</span>
-        <span class="section-desc">Upload Excel (.xlsx), CSV (.csv), or PDF (.pdf). Auto-extracts Name, Email, and metadata with zero-duplicate protection.</span>
+        <span class="section-tag">Manage Contacts</span>
+        <span class="section-desc">Add custom individual emails, bulk paste email lists, or upload files (.xlsx, .csv, .pdf). All contacts are deduplicated.</span>
       </div>
 
-      <div class="card">
-        <div id="dropzone" class="dropzone" onclick="document.getElementById('file-input').click()">
-          <div class="dropzone-icon">📥</div>
-          <div class="dropzone-title">Click to upload or drag &amp; drop files here</div>
-          <div class="dropzone-sub">Supports Excel sheets, Google Form exports, registration PDFs, and CSV lists</div>
-          <input type="file" id="file-input" style="display: none;" accept=".xlsx,.xls,.csv,.pdf" onchange="handleFileUpload(event)">
+      <!-- Two-column: Custom Email Adder + File Uploader -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px;">
+        
+        <!-- Left Card: Add Custom Emails (Single or Bulk) -->
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-title">✍️ Add Custom Emails</div>
+          <div class="card-desc">Type an individual email or paste a custom list directly into your queue.</div>
+
+          <!-- Single Contact Form -->
+          <div style="padding: 16px; background-color: #ffffff; border: 1px solid var(--gray-border); border-radius: 14px; box-shadow: 0px 3px 0px var(--gray-border); margin-bottom: 18px;">
+            <div style="font-weight: 800; font-size: 14px; margin-bottom: 10px; color: var(--dark);">Single Email Entry:</div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label">Full Name (Optional)</label>
+              <input type="text" id="custom-single-name" class="form-input" placeholder="e.g. Rahul Sharma">
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label">Email Address *</label>
+              <input type="email" id="custom-single-email" class="form-input" placeholder="e.g. rahul@example.com">
+            </div>
+            <button class="btn btn-lime" style="width: 100%; font-size: 13px;" onclick="addSingleCustomContact()">
+              ➕ Add Single Contact to Queue
+            </button>
+          </div>
+
+          <!-- Bulk Paste Form -->
+          <div style="padding: 16px; background-color: #ffffff; border: 1px solid var(--gray-border); border-radius: 14px; box-shadow: 0px 3px 0px var(--gray-border);">
+            <div style="font-weight: 800; font-size: 14px; margin-bottom: 6px; color: var(--dark);">Bulk Paste Multiple Emails:</div>
+            <p style="font-size: 12px; color: var(--gray-muted); margin-bottom: 8px;">Paste emails (one per line, comma-separated, or "Name &lt;email&gt;"):</p>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <textarea id="custom-bulk-emails" class="form-textarea" style="height: 110px; font-family: monospace; font-size: 13px;" placeholder="user1@example.com&#10;John Doe &lt;john@example.com&gt;&#10;user3@example.com, Sarah Lee"></textarea>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; font-size: 13px;" onclick="addBulkCustomContacts()">
+              ➕ Add All Emails to Queue
+            </button>
+          </div>
+
+          <div id="custom-contact-status" style="margin-top: 14px; display: none;"></div>
         </div>
 
-        <div id="upload-status" style="margin-top: 18px; display: none;"></div>
+        <!-- Right Card: File Upload -->
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-title">📥 Upload File (Excel / PDF / CSV)</div>
+          <div class="card-desc">Drag and drop member exports or registration documents to import hundreds of contacts at once.</div>
 
-        <!-- Extracted Preview Table -->
-        <div id="upload-preview-card" style="margin-top: 26px; display: none;">
-          <h4 style="color: var(--dark); font-weight: 800; margin-bottom: 14px;">Extracted Contacts Preview:</h4>
-          <div class="data-table-wrapper">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>First Name</th>
-                  <th>Email</th>
-                  <th>Extracted Metadata</th>
-                </tr>
-              </thead>
-              <tbody id="upload-preview-body"></tbody>
-            </table>
+          <div id="dropzone" class="dropzone" onclick="document.getElementById('file-input').click()" style="margin-top: 10px;">
+            <div class="dropzone-icon">📥</div>
+            <div class="dropzone-title">Click to upload or drag &amp; drop files here</div>
+            <div class="dropzone-sub">Supports Excel sheets (.xlsx), CSV (.csv), and PDFs (.pdf)</div>
+            <input type="file" id="file-input" style="display: none;" accept=".xlsx,.xls,.csv,.pdf" onchange="handleFileUpload(event)">
           </div>
+
+          <div id="upload-status" style="margin-top: 18px; display: none;"></div>
+        </div>
+
+      </div>
+
+      <!-- Preview Table -->
+      <div id="upload-preview-card" class="card" style="display: none;">
+        <h4 style="color: var(--dark); font-weight: 800; margin-bottom: 14px;">Recently Added Contacts Preview:</h4>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>First Name</th>
+                <th>Email</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="upload-preview-body"></tbody>
+          </table>
         </div>
       </div>
     </section>

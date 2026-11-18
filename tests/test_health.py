@@ -6,4 +6,4 @@ async def test_health_endpoint_direct():
     data = await health_check()
     assert data["status"] == "online"
     assert "IST" in data["time_ist"]
-    assert data["scheduler"] == "active"
+    assert data["scheduler"] == "manual_on_demand"

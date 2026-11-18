@@ -25,6 +25,10 @@ class AutomatedScheduler:
         self.task: Optional[asyncio.Task] = None
 
     def start(self):
+        if not settings.auto_schedule_enabled:
+            logger.info("Automated 18:00 IST scheduler is disabled. Manual on-demand dispatch mode active.")
+            return
+
         if not self.is_running:
             self.is_running = True
             self.task = asyncio.create_task(self._scheduler_loop())

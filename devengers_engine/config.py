@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     daily_send_limit: int = Field(default=300, description="Total daily allowance across account")
     otp_reserve_buffer: int = Field(default=10, description="Credits always reserved for website OTPs")
     brevo_api_key: str = Field(default="", description="Brevo v3 API Key to sync live OTP credit usage")
+    auto_schedule_enabled: bool = Field(default=False, description="Whether to automatically send at 6:00 PM IST (disabled by default for manual on-demand send)")
     send_delay_seconds_min: float = Field(default=5.0, description="Minimum jitter delay between sends")
     send_delay_seconds_max: float = Field(default=10.0, description="Maximum jitter delay between sends")
     batch_size: int = Field(default=25, description="Number of emails before taking a longer breather")
