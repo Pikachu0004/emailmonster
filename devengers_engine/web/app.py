@@ -98,6 +98,18 @@ class DispatchRequest(BaseModel):
     limit: Optional[int] = 300
 
 
+@app.get("/health")
+async def health_check():
+    from zoneinfo import ZoneInfo
+    now_ist = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S IST")
+    return {
+        "status": "online",
+        "service": "Devengers Mail Engine",
+        "time_ist": now_ist,
+        "scheduler": "active",
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
     index_file = STATIC_DIR / "index.html"
