@@ -33,10 +33,100 @@ class MailDispatcher:
             server.login(settings.smtp_user, settings.smtp_password)
         return server
 
+    def _send_via_brevo_api(
+        self,
+        recipient_email: str,
+        recipient_name: str,
+        subject: str,
+        html_content: str,
+        text_content: str,
+    ) -> Tuple[bool, Optional[str], Optional[str]]:
+        """Dispatches email via Brevo v3 Transactional Email HTTPS API (Render free tier safe)."""
+        import urllib.request
+        import urllib.error
+        import json
+
+        url = "https://api.brevo.com/v3/smtp/email"
+        payload = {
+            "sender": {
+                "name": settings.sender_name,
+                "email": settings.sender_email,
+            },
+            "to": [
+                {
+                    "email": recipient_email,
+                    "name": recipient_name or recipient_email.split("@")[0],
+                }
+            ],
+            "replyTo": {
+                "name": "Devengers Support",
+                "email": settings.reply_to_email,
+            },
+            "subject": subject,
+            "htmlContent": html_content,
+            "textContent": text_content,
+            "headers": {
+                "List-Unsubscribe": f"<mailto:{settings.reply_to_email}?subject=Unsubscribe>",
+                "X-Mailer": "Devengers Mail Engine 2026",
+            },
+        }
+
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "api-key": settings.brevo_api_key,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": "DevengersMailEngine/1.0",
+            },
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                msg_id = data.get("messageId", "")
+                return True, msg_id, None
+        except urllib.error.HTTPError as e:
+            try:
+                err_body = json.loads(e.read().decode("utf-8"))
+                err_msg = err_body.get("message", str(e))
+            except Exception:
+                err_msg = str(e)
+            return False, None, f"Brevo API error (HTTP {e.code}): {err_msg}"
+        except Exception as e:
+            return False, None, f"Brevo API request failed: {str(e)}"
+
     def verify_smtp_connection(self) -> Tuple[bool, str]:
-        """Tests SMTP credentials and network connectivity."""
+        """Tests email delivery authentication via Brevo HTTPS API (cloud safe) or SMTP."""
         if settings.dry_run:
             return True, "Dry-run mode is active (credentials verification simulated successfully)."
+
+        # Priority 1: If Brevo API key is configured, verify via HTTPS API (Render free tier safe)
+        if settings.brevo_api_key:
+            import urllib.request
+            import urllib.error
+            import json
+            try:
+                req = urllib.request.Request(
+                    "https://api.brevo.com/v3/account",
+                    headers={
+                        "api-key": settings.brevo_api_key,
+                        "Accept": "application/json",
+                        "User-Agent": "DevengersMailEngine/1.0",
+                    },
+                )
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    if resp.status == 200:
+                        account_data = json.loads(resp.read().decode("utf-8"))
+                        acc_email = account_data.get("email", settings.smtp_user or "Verified")
+                        return True, f"Brevo API Connected & Verified ({acc_email}). Render Cloud Compatible."
+            except urllib.error.HTTPError as e:
+                return False, f"Brevo API Key Authentication Failed (HTTP {e.code}). Please verify your BREVO_API_KEY."
+            except Exception:
+                # If network timeout or issue, fall through to SMTP test
+                pass
 
         if not settings.smtp_password or settings.smtp_password in ("your_zoho_app_password_here", "your_brevo_smtp_master_key"):
             return False, "SMTP credentials are not configured in .env. Please set your SMTP username and password/key."
@@ -90,6 +180,26 @@ class MailDispatcher:
                 error_message=None,
             )
             return True, f"[DRY_RUN]{message_id}", None
+
+        # Live Delivery: If Brevo API key is available, use HTTPS API (never blocked by Render / cloud firewalls)
+        if settings.brevo_api_key:
+            success, api_msg_id, err_msg = self._send_via_brevo_api(
+                recipient_email=clean_email,
+                recipient_name=recipient_name,
+                subject=subject,
+                html_content=html_content,
+                text_content=text_content,
+            )
+            final_msg_id = api_msg_id or message_id
+            SendLogRepository.record_send_attempt(
+                campaign_id=campaign_id,
+                contact_id=contact_id,
+                recipient_email=clean_email,
+                status="SUCCESS" if success else "FAILED",
+                message_id=final_msg_id,
+                error_message=err_msg,
+            )
+            return success, final_msg_id, err_msg
 
         # Live SMTP delivery
         server_to_close = None
@@ -188,16 +298,16 @@ class MailDispatcher:
         failed_count = 0
         skipped_count = 0
 
-        # Reuse SMTP connection when not in dry-run
+        # Reuse SMTP connection when not in dry-run and not using Brevo API
         smtp_session: Optional[smtplib.SMTP] = None
-        if not settings.dry_run:
+        if not settings.dry_run and not settings.brevo_api_key:
             try:
                 smtp_session = self.create_smtp_connection()
             except Exception as e:
                 return {
                     "success": False,
                     "reason": "SMTP_CONNECTION_ERROR",
-                    "message": f"Failed to connect to Zoho SMTP: {str(e)}",
+                    "message": f"Failed to connect to SMTP: {str(e)}",
                     "sent_count": 0,
                     "failed_count": 0,
                     "skipped_count": 0,
