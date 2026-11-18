@@ -260,7 +260,7 @@ async def send_test_email(req: TestSendRequest):
     success, msg_id, err = dispatcher.send_single_message(
         recipient_email=req.recipient_email,
         recipient_name=req.recipient_name or "",
-        subject=f"[TEST] {subj}",
+        subject=subj,
         html_content=html_body,
         text_content=text_body,
         campaign_id=None,
