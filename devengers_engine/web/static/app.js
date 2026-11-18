@@ -178,7 +178,7 @@ function getComposerValues() {
 
   return {
     template_name: getVal("tpl-select", "event_invite"),
-    subject: getVal("tpl-subject", "Congratulations {{first_name}}! You're Invited to Join DEVENGERS"),
+    subject: getVal("tpl-subject", "Invitation to join DEVENGERS for {{first_name}}"),
     event_name: getVal("tpl-event-name", "Join DEVENGERS Community"),
     event_date: getVal("tpl-event-date", "Upcoming"),
     event_time: getVal("tpl-event-time", "6:00 PM IST"),

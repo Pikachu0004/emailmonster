@@ -37,16 +37,19 @@ def build_mime_message(
     msg["Return-Path"] = settings.sender_email
     msg["Subject"] = subject
 
-    # Gmail & Yahoo 2024+ Deliverability Requirements: One-click List-Unsubscribe
-    unsub_mail = f"mailto:{settings.reply_to_email}?subject=Unsubscribe%20{recipient_email}"
-    msg["List-Unsubscribe"] = f"<{unsub_mail}>"
-    msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
-
-    # Category / Bulk Precedence
-    msg["Precedence"] = "bulk"
-    msg["X-Mailer"] = "Devengers Engine 1.0"
-    if campaign_id:
-        msg["X-Campaign-ID"] = str(campaign_id)
+    if not settings.primary_inbox_mode:
+        # Standard bulk marketing headers (Causes Gmail to categorize into Promotions tab)
+        unsub_mail = f"mailto:{settings.reply_to_email}?subject=Unsubscribe%20{recipient_email}"
+        msg["List-Unsubscribe"] = f"<{unsub_mail}>"
+        msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+        msg["Precedence"] = "bulk"
+        msg["X-Mailer"] = "Devengers Engine 1.0"
+        if campaign_id:
+            msg["X-Campaign-ID"] = str(campaign_id)
+    else:
+        # Primary Inbox Mode: Send as direct 1-to-1 personal/community message
+        msg["X-Priority"] = "3"
+        msg["Importance"] = "normal"
 
     # Attach Plain-Text Part First (Required for RFC alternative hierarchy)
     part_text = MIMEText(text_content, "plain", "utf-8")

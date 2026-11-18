@@ -37,9 +37,10 @@ class Settings(BaseSettings):
     smtp_password: str = Field(default="", description="SMTP Password / Key")
 
     # Brand and Routing
-    sender_name: str = Field(default="Devengers Events", description="Friendly sender name")
+    sender_name: str = Field(default="Team DEVENGERS", description="Friendly sender name")
     sender_email: str = Field(default="event@devengers.org", description="From address")
     reply_to_email: str = Field(default="support@devengers.org", description="Reply-To address")
+    primary_inbox_mode: bool = Field(default=True, description="Route to Gmail Primary inbox by omitting bulk marketing headers")
 
     # Quota & Rate Limiting (Brevo 300/day limit + Website OTP protection)
     daily_send_limit: int = Field(default=300, description="Total daily allowance across account")

@@ -47,6 +47,15 @@ class MailDispatcher:
         import json
 
         url = "https://api.brevo.com/v3/smtp/email"
+        api_headers = {
+            "X-Priority": "3",
+            "Importance": "normal",
+        }
+        if not settings.primary_inbox_mode:
+            api_headers["List-Unsubscribe"] = f"<mailto:{settings.reply_to_email}?subject=Unsubscribe>"
+            api_headers["X-Mailer"] = "Devengers Mail Engine 2026"
+            api_headers["Precedence"] = "bulk"
+
         payload = {
             "sender": {
                 "name": settings.sender_name,
@@ -65,10 +74,7 @@ class MailDispatcher:
             "subject": subject,
             "htmlContent": html_content,
             "textContent": text_content,
-            "headers": {
-                "List-Unsubscribe": f"<mailto:{settings.reply_to_email}?subject=Unsubscribe>",
-                "X-Mailer": "Devengers Mail Engine 2026",
-            },
+            "headers": api_headers,
         }
 
         req = urllib.request.Request(
