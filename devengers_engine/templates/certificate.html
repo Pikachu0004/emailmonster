@@ -5,52 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Certificate & Recognition | {{ event_name }}</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e2e8f0;">
+<body style="margin: 0; padding: 0; background-color: #f3f3f3; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #191a23;">
   <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all;">
     Certificate of Participation for {{ name }} - {{ event_name }}.
     &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
 
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0b0f19;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f3f3; table-layout: fixed;">
     <tr>
-      <td align="center" style="padding: 30px 15px;">
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #111827; border: 1px solid #1f2937; border-radius: 14px; overflow: hidden;">
+      <td align="center" style="padding: 36px 14px;">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border: 2px solid #191a23; border-radius: 24px; box-shadow: 0px 8px 0px #191a23; overflow: hidden;">
           
+          <!-- Top Accent Bar -->
           <tr>
-            <td height="4" style="background: linear-gradient(90deg, #f59e0b 0%, #10b981 50%, #3b82f6 100%);"></td>
+            <td height="8" style="background-color: #b9ff66; border-bottom: 2px solid #191a23;"></td>
           </tr>
 
+          <!-- Header -->
           <tr>
-            <td style="padding: 32px 36px 16px 36px; text-align: center;">
-              <span style="display: inline-block; padding: 4px 14px; background-color: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 9999px; font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase;">
+            <td style="padding: 34px 38px 18px 38px; text-align: center;">
+              <span style="display: inline-block; padding: 4px 14px; background-color: #b9ff66; border: 1px solid #191a23; border-radius: 8px; font-size: 12px; font-weight: 800; color: #191a23; text-transform: uppercase;">
                 OFFICIAL RECOGNITION
               </span>
-              <h1 style="margin: 16px 0 0 0; font-size: 24px; font-weight: 800; color: #ffffff;">
+              <h1 style="margin: 16px 0 6px 0; font-size: 26px; font-weight: 900; color: #191a23;">
                 Certificate of Participation
               </h1>
-              <p style="margin: 6px 0 0 0; color: #94a3b8; font-size: 14px;">Presented by Devengers</p>
+              <p style="margin: 0; color: #555555; font-size: 14px; font-weight: 600;">Presented by DEVENGERS</p>
             </td>
           </tr>
 
+          <!-- Body -->
           <tr>
-            <td style="padding: 0 36px 28px 36px; line-height: 1.6; color: #cbd5e1; font-size: 15px; text-align: center;">
-              <p style="margin: 0 0 16px 0;">Dear <strong>{{ name }}</strong>,</p>
+            <td style="padding: 0 38px 30px 38px; line-height: 1.65; color: #191a23; font-size: 15px; text-align: center;">
+              <p style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700;">Dear {{ name }},</p>
               
-              <p style="margin: 0 0 20px 0;">
+              <p style="margin: 0 0 20px 0; color: #374151;">
                 Thank you for your active participation and outstanding contribution in <strong>{{ event_name }}</strong>. 
                 Your dedication to learning and collaborative building made this event an overwhelming success.
               </p>
 
               {% if custom_message %}
-              <div style="margin: 0 0 20px 0; padding: 14px 18px; background-color: #1a2234; border-radius: 8px; font-size: 14px; text-align: left; color: #e2e8f0;">
+              <div style="margin: 0 0 24px 0; padding: 18px 22px; background-color: #f3f3f3; border-radius: 16px; border: 1px solid #191a23; font-size: 14px; text-align: left; color: #191a23; line-height: 1.6;">
                 {{ custom_message }}
               </div>
               {% endif %}
 
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0 20px 0;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 20px 0;">
                 <tr>
                   <td align="center">
-                    <a href="{{ cta_url }}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 34px; border-radius: 8px;">
+                    <a href="{{ cta_url }}" target="_blank" style="display: inline-block; background-color: #b9ff66; color: #191a23; text-decoration: none; font-weight: 800; font-size: 15px; padding: 14px 36px; border-radius: 12px; border: 2px solid #191a23; box-shadow: 0px 4px 0px #191a23;">
                       {{ cta_text or 'Download Your Certificate' }} &rarr;
                     </a>
                   </td>
@@ -59,11 +62,12 @@
             </td>
           </tr>
 
+          <!-- Footer -->
           <tr>
-            <td style="padding: 24px 36px; background-color: #0d121e; border-top: 1px solid #1f2937; font-size: 12px; color: #64748b; text-align: center; line-height: 1.6;">
-              Devengers Events &bull; Questions? Reply directly to <a href="mailto:{{ reply_to_email }}" style="color: #38bdf8; text-decoration: none;">{{ reply_to_email }}</a><br>
-              Dispatched from <a href="mailto:{{ sender_email }}" style="color: #818cf8; text-decoration: none;">{{ sender_email }}</a> &bull;
-              <a href="mailto:{{ reply_to_email }}?subject=Unsubscribe%20{{ email }}" style="color: #64748b; text-decoration: underline;">Unsubscribe</a>
+            <td style="padding: 24px 38px; background-color: #f3f3f3; border-top: 2px solid #191a23; font-size: 12px; color: #555555; line-height: 1.6; text-align: center;">
+              <strong style="color: #191a23;">Devengers Events</strong> &bull; From: <a href="mailto:{{ sender_email }}" style="color: #191a23; font-weight: 700; text-decoration: none;">{{ sender_email }}</a><br>
+              Direct replies: <a href="mailto:{{ reply_to_email }}" style="color: #191a23; font-weight: 700; text-decoration: none;">{{ reply_to_email }}</a>.<br>
+              To stop receiving updates, <a href="mailto:{{ reply_to_email }}?subject=Unsubscribe%20{{ email }}" style="color: #555555; text-decoration: underline;">click here to unsubscribe</a>.
             </td>
           </tr>
 

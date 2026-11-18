@@ -129,8 +129,8 @@ async function uploadFileObj(file) {
     }
 
     statusEl.innerHTML = `
-      <div style="padding: 12px; background-color: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #10b981;">
-        <strong>Success:</strong> Extracted <strong>${data.total_extracted}</strong> valid contacts! 
+      <div style="padding: 14px 18px; background-color: var(--primary-lime); border: 2px solid var(--gray-border); border-radius: 12px; color: var(--dark); box-shadow: 0px 3px 0px var(--gray-border); font-size: 14px;">
+        <strong>✓ Success:</strong> Extracted <strong>${data.total_extracted}</strong> valid contacts! 
         (New: ${data.newly_inserted}, Updated: ${data.existing_updated})
       </div>
     `;
@@ -143,10 +143,10 @@ async function uploadFileObj(file) {
       data.preview_sample.forEach(c => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td><strong>${c.name}</strong></td>
+          <td><strong style="color: var(--dark);">${c.name}</strong></td>
           <td>${c.first_name}</td>
-          <td><code style="color: #38bdf8;">${c.email}</code></td>
-          <td><span style="font-size: 11px; color: #94a3b8;">${JSON.stringify(c.extra_data)}</span></td>
+          <td><code style="color: var(--dark); font-weight: 700; background: var(--gray-card); padding: 2px 6px; border-radius: 4px;">${c.email}</code></td>
+          <td><span style="font-size: 12px; color: var(--gray-muted);">${JSON.stringify(c.extra_data)}</span></td>
         `;
         tbody.appendChild(row);
       });
@@ -156,8 +156,8 @@ async function uploadFileObj(file) {
     fetchStats();
   } catch (err) {
     statusEl.innerHTML = `
-      <div style="padding: 12px; background-color: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444;">
-        <strong>Upload Error:</strong> ${err.message}
+      <div style="padding: 14px 18px; background-color: #ffccc7; border: 2px solid var(--gray-border); border-radius: 12px; color: var(--dark); box-shadow: 0px 3px 0px var(--gray-border); font-size: 14px;">
+        <strong>✗ Upload Error:</strong> ${err.message}
       </div>
     `;
   }
@@ -231,20 +231,23 @@ async function checkSpamScore(payload) {
     ratingEl.innerText = `${data.rating} Deliverability`;
 
     if (data.score >= 85) {
-      scoreBadge.style.backgroundColor = "#10b981";
-      ratingEl.style.color = "#10b981";
+      scoreBadge.style.backgroundColor = "var(--primary-lime)";
+      scoreBadge.style.color = "var(--dark)";
+      ratingEl.style.color = "var(--dark)";
     } else if (data.score >= 70) {
-      scoreBadge.style.backgroundColor = "#f59e0b";
-      ratingEl.style.color = "#f59e0b";
+      scoreBadge.style.backgroundColor = "#ffe58f";
+      scoreBadge.style.color = "var(--dark)";
+      ratingEl.style.color = "var(--dark)";
     } else {
-      scoreBadge.style.backgroundColor = "#ef4444";
-      ratingEl.style.color = "#ef4444";
+      scoreBadge.style.backgroundColor = "#ff7875";
+      scoreBadge.style.color = "#ffffff";
+      ratingEl.style.color = "var(--dark)";
     }
 
     if (data.issues && data.issues.length) {
       issuesEl.innerHTML = `<strong>Deliverability Notes:</strong> ` + data.issues.join(" | ");
     } else {
-      issuesEl.innerHTML = `<span style="color: #10b981;">✓ Optimal Gmail deliverability. No trigger words or formatting flags found.</span>`;
+      issuesEl.innerHTML = `<span style="color: var(--dark); font-weight: 700;">✓ Optimal Gmail deliverability. High reputation verified.</span>`;
     }
   } catch (err) {
     console.error("Spam check failed:", err);
@@ -288,14 +291,14 @@ async function sendTestEmail() {
     const data = await res.json();
 
     if (data.success) {
-      resEl.innerHTML = `<span style="color: #10b981;">✓ Test sent successfully! Message-ID: ${data.message_id}</span>`;
+      resEl.innerHTML = `<div style="padding: 10px 14px; background: var(--primary-lime); border: 2px solid var(--gray-border); border-radius: 10px; color: var(--dark); font-weight: 700; box-shadow: 0px 3px 0px var(--gray-border);">✓ Test sent successfully! Message-ID: <code>${data.message_id}</code></div>`;
       fetchLogs();
       fetchStats();
     } else {
-      resEl.innerHTML = `<span style="color: #ef4444;">✗ Send Failed: ${data.error}</span>`;
+      resEl.innerHTML = `<div style="padding: 10px 14px; background: #ffccc7; border: 2px solid var(--gray-border); border-radius: 10px; color: var(--dark); font-weight: 700; box-shadow: 0px 3px 0px var(--gray-border);">✗ Send Failed: ${data.error}</div>`;
     }
   } catch (err) {
-    resEl.innerHTML = `<span style="color: #ef4444;">✗ Network Error: ${err.message}</span>`;
+    resEl.innerHTML = `<div style="padding: 10px 14px; background: #ffccc7; border: 2px solid var(--gray-border); border-radius: 10px; color: var(--dark); font-weight: 700; box-shadow: 0px 3px 0px var(--gray-border);">✗ Network Error: ${err.message}</div>`;
   }
 }
 
@@ -385,13 +388,15 @@ async function fetchLogs() {
 
     data.logs.forEach(l => {
       const row = document.createElement("tr");
-      const statusClass = l.status === "SUCCESS" ? "color: #10b981;" : "color: #ef4444;";
+      const statusBadge = l.status === "SUCCESS"
+        ? `<span class="tag-pill" style="background: var(--primary-lime); color: var(--dark); border-color: var(--gray-border);">SUCCESS</span>`
+        : `<span class="tag-pill" style="background: #ff7875; color: #fff; border-color: var(--gray-border);">${l.status}</span>`;
       row.innerHTML = `
-        <td><strong style="color: #fff;">${l.recipient_email}</strong></td>
+        <td><strong style="color: var(--dark);">${l.recipient_email}</strong></td>
         <td>${l.contact_name || '-'}</td>
-        <td><span style="${statusClass} font-weight: 700;">${l.status}</span></td>
-        <td><code style="font-size: 11px; color: #94a3b8;">${l.message_id || '-'}</code></td>
-        <td style="font-size: 12px; color: #94a3b8;">${new Date(l.sent_at).toLocaleTimeString()}</td>
+        <td>${statusBadge}</td>
+        <td><code style="font-size: 12px; color: var(--gray-muted);">${l.message_id || '-'}</code></td>
+        <td style="font-size: 13px; color: var(--gray-muted); font-weight: 600;">${new Date(l.sent_at).toLocaleTimeString()}</td>
       `;
       tbody.appendChild(row);
     });
@@ -412,11 +417,11 @@ async function fetchDnsGuide() {
     data.guide.records.forEach(r => {
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td><span class="tag-pill" style="color: #60a5fa;">${r.type}</span></td>
-        <td><code>${r.host}</code></td>
-        <td><code style="color: #cbd5e1; word-break: break-all;">${r.value}</code></td>
-        <td>${r.priority || '-'}</td>
-        <td style="font-size: 12px; color: #94a3b8;">${r.purpose}</td>
+        <td><span class="tag-pill">${r.type}</span></td>
+        <td><code style="font-weight: 700; color: var(--dark);">${r.host}</code></td>
+        <td><code style="color: var(--dark); background: var(--gray-card); padding: 3px 6px; border-radius: 4px; word-break: break-all;">${r.value}</code></td>
+        <td><strong>${r.priority || '-'}</strong></td>
+        <td style="font-size: 13px; color: var(--gray-muted); font-weight: 500;">${r.purpose}</td>
       `;
       tbody.appendChild(row);
     });
