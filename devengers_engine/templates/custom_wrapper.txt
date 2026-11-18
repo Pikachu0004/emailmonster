@@ -1,0 +1,18 @@
+{{ event_name }} | DEVENGERS
+============================================================
+
+Hello {{ first_name }},
+
+{{ custom_message }}
+
+{% if cta_url and cta_url != 'https://devengers.org' %}
+LINK:
+{{ cta_url }}
+{% endif %}
+
+============================================================
+SUPPORT:
+Questions or feedback? Simply reply directly to this email or write to: {{ reply_to_email }}.
+Dispatched by {{ sender_name }} <{{ sender_email }}>.
+
+To opt out or unsubscribe, reply with subject "Unsubscribe" or email {{ reply_to_email }}.

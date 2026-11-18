@@ -1,0 +1,23 @@
+CERTIFICATE OF PARTICIPATION | DEVENGERS
+============================================================
+
+Dear {{ name }},
+
+Thank you for your active participation and outstanding contribution in {{ event_name }}. 
+Your dedication to learning and collaborative building made this event an overwhelming success.
+
+{% if custom_message %}
+--- NOTE ---
+{{ custom_message }}
+------------
+{% endif %}
+
+DOWNLOAD YOUR CERTIFICATE:
+{{ cta_url }}
+
+============================================================
+SUPPORT:
+Questions? Reply directly to this email or contact {{ reply_to_email }}.
+Dispatched from {{ sender_name }} <{{ sender_email }}>.
+
+To opt out or unsubscribe, reply with subject "Unsubscribe" or email {{ reply_to_email }}.

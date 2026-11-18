@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devengers Mail Engine | High-Deliverability Dispatcher</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div class="logo-badge">⚡</div>
+      <div>
+        <div class="brand-title">Devengers Mail Engine</div>
+        <div class="brand-subtitle">event@devengers.org &bull; Replies &rarr; support@devengers.org</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div id="smtp-badge" class="badge badge-dryrun">Connecting...</div>
+      <div id="quota-header-badge" class="badge badge-connected">Quota: -- / 300</div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview & Quota</button>
+    <button class="tab-btn" onclick="switchTab('upload')">📁 Upload File (Excel / PDF / CSV)</button>
+    <button class="tab-btn" onclick="switchTab('studio')">✍️ Template Studio & Anti-Spam</button>
+    <button class="tab-btn" onclick="switchTab('dispatch')">🚀 Dispatch & Live Feed</button>
+    <button class="tab-btn" onclick="switchTab('dns')">🌐 Spaceship DNS Setup</button>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+
+    <!-- 1. OVERVIEW TAB -->
+    <section id="tab-overview" class="tab-panel active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Daily Zoho Quota</span>
+            <span>⚡ Max 300</span>
+          </div>
+          <div class="stat-value" id="stat-sent-today">0 / 300</div>
+          <div class="stat-meta" id="stat-remaining-quota">300 remaining today</div>
+          <div class="progress-bar-container">
+            <div id="quota-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Total Contacts</span>
+            <span>👥 Ledger</span>
+          </div>
+          <div class="stat-value" id="stat-total-contacts">0</div>
+          <div class="stat-meta">Unique addresses stored</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Already Emailed</span>
+            <span>✅ Deduplicated</span>
+          </div>
+          <div class="stat-value" id="stat-already-emailed">0</div>
+          <div class="stat-meta">Will never be re-emailed</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Pending Next Batch</span>
+            <span>⏳ FIFO Queue</span>
+          </div>
+          <div class="stat-value" id="stat-pending-contacts">0</div>
+          <div class="stat-meta">Ready in order (first to last)</div>
+        </div>
+      </div>
+
+      <!-- System Health Card -->
+      <div class="card">
+        <div class="card-title">🛡️ System Configuration & Deliverability Guard</div>
+        <div class="card-desc">Active routing and anti-spam deliverability rules enforced for Devengers</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div style="padding: 14px; background: #0b0f19; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">From Address</div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">Devengers Events &lt;event@devengers.org&gt;</div>
+          </div>
+          <div style="padding: 14px; background: #0b0f19; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Reply-To Destination</div>
+            <div style="font-size: 14px; font-weight: 700; color: #38bdf8; margin-top: 4px;">support@devengers.org</div>
+          </div>
+          <div style="padding: 14px; background: #0b0f19; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Anti-Spam Pacing</div>
+            <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-top: 4px;">5 - 10s Jitter + 30s Batch Rest</div>
+          </div>
+          <div style="padding: 14px; background: #0b0f19; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Zoho Host</div>
+            <div id="cfg-smtp-host" style="font-size: 14px; font-weight: 700; color: #a5b4fc; margin-top: 4px;">smtppro.zoho.in:465</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. UPLOAD TAB -->
+    <section id="tab-upload" class="tab-panel">
+      <div class="card">
+        <div class="card-title">📁 Import Contact Lists</div>
+        <div class="card-desc">Upload Excel (.xlsx), CSV (.csv), or PDF (.pdf). Auto-extracts Name, Email, and metadata with zero-duplicate protection.</div>
+        
+        <div id="dropzone" class="dropzone" onclick="document.getElementById('file-input').click()">
+          <div class="dropzone-icon">📥</div>
+          <div class="dropzone-title">Click to upload or drag & drop files here</div>
+          <div class="dropzone-sub">Supports Excel sheets, Google Form exports, registration PDFs, CSV lists</div>
+          <input type="file" id="file-input" style="display: none;" accept=".xlsx,.xls,.csv,.pdf" onchange="handleFileUpload(event)">
+        </div>
+
+        <div id="upload-status" style="margin-top: 16px; display: none;"></div>
+
+        <!-- Extracted Preview Table -->
+        <div id="upload-preview-card" style="margin-top: 24px; display: none;">
+          <h4 style="color: #fff; margin-bottom: 12px;">Recently Extracted Contacts Sample:</h4>
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>First Name</th>
+                  <th>Email</th>
+                  <th>Extracted Metadata</th>
+                </tr>
+              </thead>
+              <tbody id="upload-preview-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. STUDIO TAB -->
+    <section id="tab-studio" class="tab-panel">
+      <div class="studio-layout">
+        <!-- Controls Column -->
+        <div>
+          <div class="card">
+            <div class="card-title">🎨 Dynamic Email Composer</div>
+            
+            <div class="form-group">
+              <label class="form-label">Template Preset</label>
+              <select id="tpl-select" class="form-select" onchange="refreshPreview()">
+                <option value="event_invite">Tech Event / Hackathon Invitation (Recommended)</option>
+                <option value="community_update">Community Update / Newsletter</option>
+                <option value="certificate">Certificate & Appreciation Letter</option>
+                <option value="custom_wrapper">Custom Announcement</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Subject Line</label>
+              <input type="text" id="tpl-subject" class="form-input" value="Exclusive Invitation for {{first_name}} | Devengers" oninput="debouncePreview()">
+              <div style="margin-top: 6px;">
+                <span style="font-size: 11px; color: var(--text-muted);">Quick tags:</span>
+                <span class="tag-pill" onclick="insertTag('{{first_name}}')">{{first_name}}</span>
+                <span class="tag-pill" onclick="insertTag('{{name}}')">{{name}}</span>
+                <span class="tag-pill" onclick="insertTag('{{event_name}}')">{{event_name}}</span>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Event / Topic Name</label>
+                <input type="text" id="tpl-event-name" class="form-input" value="Devengers AI & Web3 Summit 2026" oninput="debouncePreview()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="text" id="tpl-event-date" class="form-input" value="Saturday, November 28, 2026" oninput="debouncePreview()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Time</label>
+                <input type="text" id="tpl-event-time" class="form-input" value="6:00 PM - 8:30 PM IST" oninput="debouncePreview()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Location / Platform</label>
+                <input type="text" id="tpl-event-location" class="form-input" value="Online via Google Meet & Discord" oninput="debouncePreview()">
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">CTA Button Link</label>
+                <input type="text" id="tpl-cta-url" class="form-input" value="https://devengers.org/rsvp" oninput="debouncePreview()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">CTA Button Label</label>
+                <input type="text" id="tpl-cta-text" class="form-input" value="Confirm Your Attendance" oninput="debouncePreview()">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Custom Message Note</label>
+              <textarea id="tpl-custom-message" class="form-textarea" placeholder="Add personalized remarks or special instructions..." oninput="debouncePreview()">We're holding an exclusive seat for you. Get ready for hands-on demos, keynote sessions, and networking with top engineers.</textarea>
+            </div>
+
+            <!-- Spam Radar Card -->
+            <div id="spam-radar" class="spam-meter">
+              <div>
+                <div style="font-weight: 700; color: #fff; font-size: 14px;">Gmail Deliverability Score</div>
+                <div id="spam-rating" style="font-size: 12px; color: var(--accent-success); margin-top: 2px;">Analyzing...</div>
+              </div>
+              <div id="spam-score-badge" class="spam-score-circle" style="background-color: #10b981;">95</div>
+            </div>
+            <div id="spam-issues" style="font-size: 12px; color: var(--accent-warning); margin-top: 8px;"></div>
+          </div>
+        </div>
+
+        <!-- Live Preview Column -->
+        <div>
+          <div class="preview-frame-container">
+            <div class="preview-toolbar">
+              <span style="font-size: 12px; font-weight: 600; color: #94a3b8;">Live Rendering Preview (Gmail Compatible)</span>
+              <div>
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="setPreviewWidth('100%')">Desktop</button>
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="setPreviewWidth('380px')">Mobile</button>
+              </div>
+            </div>
+            <iframe id="preview-iframe" class="preview-iframe"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DISPATCH TAB -->
+    <section id="tab-dispatch" class="tab-panel">
+      <div class="card">
+        <div class="card-title">🚀 Dispatch Controller & Safety Pacing</div>
+        <div class="card-desc">Sends emails in strict FIFO sequential order from first to last, automatically skipping any members already emailed.</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- Test Send Box -->
+          <div style="padding: 18px; background-color: #0b0f19; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: #fff; margin-bottom: 8px;">🧪 Send Single Test Email</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Verify how the email looks inside your actual Gmail inbox before starting bulk dispatch.</p>
+            <div class="form-group">
+              <label class="form-label">Recipient Email</label>
+              <input type="email" id="test-recipient" class="form-input" placeholder="e.g. your_email@gmail.com">
+            </div>
+            <button class="btn btn-secondary" onclick="sendTestEmail()">Send Test Verification</button>
+            <div id="test-result" style="margin-top: 10px; font-size: 12px;"></div>
+          </div>
+
+          <!-- Bulk Send Box -->
+          <div style="padding: 18px; background-color: #0b0f19; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: #fff; margin-bottom: 8px;">⚡ Start Today's Batch</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Automatically respects the 300 daily Zoho limit. Tomorrow's run will seamlessly continue from where today stops.</p>
+            <div class="form-group">
+              <label class="form-label">Batch Size Limit (Max remaining today)</label>
+              <input type="number" id="dispatch-limit" class="form-input" value="300" min="1" max="300">
+            </div>
+            <button id="btn-start-dispatch" class="btn btn-primary" onclick="startBatchDispatch()">
+              Start Automated Dispatch &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Dispatch Status Card -->
+        <div id="dispatch-progress-card" style="margin-top: 24px; padding: 20px; background-color: #172033; border-radius: 8px; border: 1px solid #283548; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-weight: 700; color: #fff;">Dispatch in Progress...</div>
+            <div id="dispatch-counter" style="font-size: 13px; font-weight: 700; color: #38bdf8;">0 / 0</div>
+          </div>
+          <div class="progress-bar-container" style="height: 10px;">
+            <div id="dispatch-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div id="dispatch-status-msg" style="font-size: 13px; color: #94a3b8; margin-top: 10px;">Initializing queue...</div>
+        </div>
+
+        <!-- Recent Logs Table -->
+        <div style="margin-top: 28px;">
+          <h4 style="color: #fff; margin-bottom: 12px;">Recent Dispatch Logs & Audit Ledger:</h4>
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Recipient</th>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Message ID</th>
+                  <th>Dispatched At</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. DNS SETUP TAB -->
+    <section id="tab-dns" class="tab-panel">
+      <div class="card">
+        <div class="card-title">🌐 Spaceship & Zoho DNS Deliverability Setup</div>
+        <div class="card-desc">Exact DNS records required in your Spaceship domain panel for devengers.org to ensure emails never land in spam.</div>
+
+        <div style="margin-bottom: 20px;">
+          <h4 style="color: #fff; margin-bottom: 8px;">Step-by-Step Instructions:</h4>
+          <ol style="margin-left: 20px; color: var(--text-secondary); font-size: 14px; line-height: 1.7;">
+            <li>Log in to your <strong>Spaceship.com</strong> account.</li>
+            <li>Click <strong>Domains</strong> &rarr; Select <strong>devengers.org</strong> &rarr; Click <strong>Advanced DNS</strong>.</li>
+            <li>Add the MX and TXT records specified in the table below.</li>
+            <li>In <strong>Zoho Mail Admin Console</strong> &rarr; <strong>Domains</strong>, click <strong>Verify</strong> for SPF and DKIM.</li>
+          </ol>
+        </div>
+
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Host / Name</th>
+                <th>Value / Target</th>
+                <th>Priority</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody id="dns-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

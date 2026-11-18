@@ -1,0 +1,22 @@
+DEVENGERS COMMUNITY UPDATE: {{ event_name }}
+============================================================
+
+Hi {{ first_name }},
+
+Here is your latest update from the Devengers network. We have exciting developments, upcoming collaborative sprints, and newly published resources for members.
+
+{% if custom_message %}
+--- ANNOUNCEMENT ---
+{{ custom_message }}
+-------------------
+{% endif %}
+
+LEARN MORE / TAKE ACTION:
+{{ cta_url }} ({{ cta_text }})
+
+============================================================
+SUPPORT & QUESTIONS:
+Direct replies to this email go to our team at: {{ reply_to_email }}
+Sent by {{ sender_name }} <{{ sender_email }}>.
+
+To opt out, reply with "Unsubscribe" or email {{ reply_to_email }}.

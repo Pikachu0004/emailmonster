@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ event_name }}</title>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td, a { font-family: Arial, Helvetica, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color: #e2e8f0;">
+  <!-- Hidden Preheader Text for Gmail snippet -->
+  <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all;">
+    Exclusive invitation for {{ name }} to {{ event_name }} — confirm your attendance today.
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0b0f19; table-layout: fixed;">
+    <tr>
+      <td align="center" style="padding: 30px 15px;">
+        <!-- Container Card -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #111827; border: 1px solid #1f2937; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);">
+          
+          <!-- Top Accent Bar -->
+          <tr>
+            <td height="4" style="background: linear-gradient(90deg, #6366f1 0%, #38bdf8 50%, #10b981 100%);"></td>
+          </tr>
+
+          <!-- Header / Brand -->
+          <tr>
+            <td style="padding: 32px 36px 20px 36px; text-align: left;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td>
+                    <span style="display: inline-block; padding: 4px 12px; background-color: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 9999px; font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 1px;">
+                      DEVENGERS OFFICIAL INVITATION
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-top: 16px;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1.25;">
+                      {{ event_name }}
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 0 36px 28px 36px; line-height: 1.6; color: #cbd5e1; font-size: 15px;">
+              <p style="margin: 0 0 16px 0; font-size: 16px; color: #f8fafc;">
+                Hello <strong>{{ first_name }}</strong>,
+              </p>
+              
+              <p style="margin: 0 0 20px 0;">
+                We are thrilled to formally invite you to the upcoming <strong>{{ event_name }}</strong>. Our team has curated an inspiring session designed to share valuable insights, connect you with fellow engineers and builders, and push tech frontiers forward.
+              </p>
+
+              {% if custom_message %}
+              <div style="margin: 0 0 20px 0; padding: 14px 18px; background-color: #1a2234; border-left: 3px solid #6366f1; border-radius: 6px; font-size: 14px; color: #e2e8f0;">
+                {{ custom_message }}
+              </div>
+              {% endif %}
+
+              <!-- Event Details Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0 24px 0; background-color: #172033; border: 1px solid #283548; border-radius: 10px;">
+                <tr>
+                  <td style="padding: 18px 22px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="30" valign="top" style="padding-bottom: 12px; font-size: 16px;">📅</td>
+                        <td valign="top" style="padding-bottom: 12px; color: #94a3b8; font-size: 13px;">
+                          <strong style="color: #f1f5f9; display: block; font-size: 14px;">Date</strong>
+                          {{ event_date }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="30" valign="top" style="padding-bottom: 12px; font-size: 16px;">⏰</td>
+                        <td valign="top" style="padding-bottom: 12px; color: #94a3b8; font-size: 13px;">
+                          <strong style="color: #f1f5f9; display: block; font-size: 14px;">Time</strong>
+                          {{ event_time }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="30" valign="top" style="font-size: 16px;">📍</td>
+                        <td valign="top" style="color: #94a3b8; font-size: 13px;">
+                          <strong style="color: #f1f5f9; display: block; font-size: 14px;">Location / Platform</strong>
+                          {{ event_location }}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Call to Action Button -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 20px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ cta_url }}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 34px; border-radius: 8px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4); text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);">
+                      {{ cta_text }} &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 20px 0 0 0; font-size: 13px; color: #94a3b8; text-align: center;">
+                Seats are limited. Please reserve early to guarantee access.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 36px 32px 36px; background-color: #0d121e; border-top: 1px solid #1f2937; font-size: 12px; color: #64748b; line-height: 1.6;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td style="padding-bottom: 10px;">
+                    <strong style="color: #94a3b8;">Devengers Community & Events</strong><br>
+                    Dispatched from <a href="mailto:{{ sender_email }}" style="color: #818cf8; text-decoration: none;">{{ sender_email }}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom: 12px;">
+                    Have questions or need assistance? Simply reply to this email or reach us directly at 
+                    <a href="mailto:{{ reply_to_email }}" style="color: #38bdf8; text-decoration: none; font-weight: 600;">{{ reply_to_email }}</a>.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border-top: 1px solid #1e293b; padding-top: 12px; color: #475569;">
+                    &copy; {{ current_year }} Devengers. All rights reserved.<br>
+                    You received this invitation because you are a registered member of Devengers or attended a previous workshop. 
+                    If you prefer not to receive event updates, you can 
+                    <a href="mailto:{{ reply_to_email }}?subject=Unsubscribe%20{{ email }}" style="color: #64748b; text-decoration: underline;">unsubscribe here</a>.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

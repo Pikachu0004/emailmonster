@@ -1,0 +1,32 @@
+DEVENGERS OFFICIAL INVITATION: {{ event_name }}
+============================================================
+
+Hello {{ first_name }},
+
+We are thrilled to formally invite you to the upcoming {{ event_name }}. Our team has curated an inspiring session designed to share valuable insights, connect you with fellow engineers and builders, and push tech frontiers forward.
+
+{% if custom_message %}
+--- NOTE ---
+{{ custom_message }}
+------------
+{% endif %}
+
+EVENT DETAILS:
+- Event: {{ event_name }}
+- Date: {{ event_date }}
+- Time: {{ event_time }}
+- Location / Platform: {{ event_location }}
+
+CONFIRM YOUR ATTENDANCE:
+{{ cta_url }}
+
+Seats are limited, so please reserve early to guarantee access.
+
+============================================================
+SUPPORT & ASSISTANCE:
+If you have any questions, simply reply directly to this email or reach us at: {{ reply_to_email }}
+
+Sender: {{ sender_name }} <{{ sender_email }}>
+(c) {{ current_year }} Devengers. All rights reserved.
+
+To opt out or unsubscribe from future announcements, reply with subject "Unsubscribe" or email {{ reply_to_email }}.
