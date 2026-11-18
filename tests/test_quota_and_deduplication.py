@@ -79,8 +79,9 @@ def test_fifo_ordering_and_zero_duplicate_continuation():
 
 def test_hard_daily_quota_enforcement(monkeypatch):
     """Verifies that dispatch halts when daily quota is exhausted."""
-    # Set quota to 3
+    # Set quota to 3 with 0 buffer for this specific boundary test
     monkeypatch.setattr(settings, "daily_send_limit", 3)
+    monkeypatch.setattr(settings, "otp_reserve_buffer", 0)
 
     contacts = [
         {"name": f"Member {i}", "email": f"member{i}@devengers.org"}

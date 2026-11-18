@@ -41,12 +41,14 @@ async function fetchStats() {
     const sentToday = data.daily_quota.sent_today;
     const limit = data.daily_quota.limit;
     const remaining = data.daily_quota.remaining_today;
+    const otpUsed = data.daily_quota.used_by_otp || 0;
+    const buffer = data.daily_quota.otp_reserve_buffer || 10;
     const pct = data.daily_quota.percentage_used;
 
     document.getElementById("stat-sent-today").innerText = `${sentToday} / ${limit}`;
-    document.getElementById("stat-remaining-quota").innerText = `${remaining} remaining today`;
+    document.getElementById("stat-remaining-quota").innerText = `${remaining} safe for bot (OTPs: ${otpUsed}, Reserved: ${buffer})`;
     document.getElementById("quota-progress-fill").style.width = `${pct}%`;
-    document.getElementById("quota-header-badge").innerText = `Quota: ${sentToday}/${limit}`;
+    document.getElementById("quota-header-badge").innerText = `Bot Allowance: ${remaining} (Reserve: ${buffer})`;
 
     // Contacts
     document.getElementById("stat-total-contacts").innerText = data.contacts.total_contacts;

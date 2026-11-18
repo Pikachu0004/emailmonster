@@ -14,6 +14,7 @@ from devengers_engine.templates.engine import template_engine
 from devengers_engine.deliverability.dns_advisor import DNSAdvisor
 from devengers_engine.deliverability.spam_checker import SpamChecker
 from devengers_engine.dispatcher.sender import dispatcher
+from devengers_engine.dispatcher.quota_sync import DynamicQuotaManager
 
 
 def main():
@@ -93,8 +94,7 @@ def main():
 
     elif args.command == "status":
         summary = ContactRepository.get_contacts_summary()
-        sent_today = SendLogRepository.get_daily_sent_count()
-        remaining = SendLogRepository.get_remaining_daily_quota()
+        quota = DynamicQuotaManager.calculate_dynamic_quota()
 
         print("\n========================================================")
         print("          DEVENGERS MAIL ENGINE - STATUS REPORT         ")
@@ -110,14 +110,18 @@ def main():
         print(f"Unsubscribed:           {summary['unsubscribed']}")
         print(f"Pending Unemailed:      {summary['pending_unemailed']}")
         print("--------------------------------------------------------")
-        print(f"Today's Sent Count:     {sent_today} / {settings.daily_send_limit}")
-        print(f"Today's Quota Left:     {remaining} emails")
+        print(f"Total Account Limit:    {quota['total_account_limit']} emails / day")
+        print(f"Credits Used Today:     {quota['total_used_today']} (OTPs: {quota['used_by_otp_today']}, Bot: {quota['used_by_bot_today']})")
+        print(f"OTP Safety Buffer:      {quota['otp_reserve_buffer']} strictly reserved for website OTPs")
+        print(f"Safe For Bot Today:     {quota['safe_to_send_now']} emails (Auto-adjusted)")
+        print(f"Data Source:            {quota['source']}")
         print("========================================================\n")
 
     elif args.command == "send":
-        remaining = SendLogRepository.get_remaining_daily_quota()
+        quota = DynamicQuotaManager.calculate_dynamic_quota()
+        remaining = quota["safe_to_send_now"]
         if remaining <= 0:
-            print(f"❌ Daily limit of {settings.daily_send_limit} emails reached today. Aborting.")
+            print(f"⚠️ No safe quota remaining today ({quota['total_used_today']} used, {quota['otp_reserve_buffer']} strictly reserved for website OTPs). Aborting.")
             sys.exit(1)
 
         effective_limit = min(args.limit, remaining)
@@ -228,13 +232,15 @@ def main():
                 break
 
             print(f"\n🚀 [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Triggering daily batch...")
-            remaining = SendLogRepository.get_remaining_daily_quota()
+            quota = DynamicQuotaManager.calculate_dynamic_quota()
+            remaining = quota["safe_to_send_now"]
             if remaining <= 0:
-                print(f"⚠️ Daily quota of {settings.daily_send_limit} already reached today. Sleeping until tomorrow.")
+                print(f"⚠️ Account used {quota['total_used_today']} emails today ({quota['used_by_otp_today']} OTPs). Only {quota['otp_reserve_buffer']} remain, strictly reserved for OTPs. Sleeping until tomorrow.")
                 time.sleep(60)
                 continue
 
             effective_limit = min(args.limit, remaining)
+            print(f"⚡ Dynamic Adjustment: Account used {quota['total_used_today']} today ({quota['used_by_otp_today']} OTPs). Dispatching {effective_limit} emails, leaving {quota['otp_reserve_buffer']} for OTPs.")
             candidates = ContactRepository.get_unemailed_contacts(limit=effective_limit)
 
             if not candidates:

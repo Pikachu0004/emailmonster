@@ -152,10 +152,10 @@ class MailDispatcher:
         """
         self.quota_limiter.reset_batch_counter()
 
-        # Check today's quota
+        # Check today's dynamic quota (accounting for website OTPs & 10 buffer)
         can_send, sent_today, remaining_quota = self.quota_limiter.can_send_today()
         if not can_send:
-            msg = f"Daily Zoho quota of {settings.daily_send_limit} emails already reached for today ({sent_today} sent). Halting dispatch."
+            msg = f"Account daily quota of {settings.daily_send_limit} reached or reserved for website OTPs ({sent_today} used today, {settings.otp_reserve_buffer} strictly reserved for OTP). Halting bot dispatch."
             CampaignRepository.finish_campaign(campaign_id, status="PAUSED_DAILY_LIMIT")
             return {
                 "success": False,

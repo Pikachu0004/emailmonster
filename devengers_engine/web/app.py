@@ -19,6 +19,7 @@ from devengers_engine.templates.engine import template_engine
 from devengers_engine.deliverability.spam_checker import SpamChecker
 from devengers_engine.deliverability.dns_advisor import DNSAdvisor
 from devengers_engine.dispatcher.sender import dispatcher
+from devengers_engine.dispatcher.quota_sync import DynamicQuotaManager
 
 # Initialize Database on app startup
 init_db()
@@ -98,18 +99,20 @@ async def serve_index():
 @app.get("/api/stats")
 async def get_stats():
     summary = ContactRepository.get_contacts_summary()
-    sent_today = SendLogRepository.get_daily_sent_count()
-    remaining_today = SendLogRepository.get_remaining_daily_quota()
-
+    dynamic_quota = DynamicQuotaManager.calculate_dynamic_quota()
     smtp_ok, smtp_msg = dispatcher.verify_smtp_connection()
 
     return {
         "contacts": summary,
         "daily_quota": {
-            "limit": settings.daily_send_limit,
-            "sent_today": sent_today,
-            "remaining_today": remaining_today,
-            "percentage_used": round((sent_today / settings.daily_send_limit) * 100, 1),
+            "limit": dynamic_quota["total_account_limit"],
+            "sent_today": dynamic_quota["total_used_today"],
+            "used_by_otp": dynamic_quota["used_by_otp_today"],
+            "used_by_bot": dynamic_quota["used_by_bot_today"],
+            "otp_reserve_buffer": dynamic_quota["otp_reserve_buffer"],
+            "remaining_today": dynamic_quota["safe_to_send_now"],
+            "percentage_used": round((dynamic_quota["total_used_today"] / dynamic_quota["total_account_limit"]) * 100, 1),
+            "source": dynamic_quota["source"],
         },
         "smtp": {
             "status": "connected" if smtp_ok else "warning",
@@ -295,11 +298,12 @@ async def start_dispatch(req: DispatchRequest, background_tasks: BackgroundTasks
         raise HTTPException(status_code=409, detail="A dispatch is currently running. Please wait for it to complete.")
 
     # Calculate remaining quota
-    remaining_quota = SendLogRepository.get_remaining_daily_quota()
+    dynamic_quota = DynamicQuotaManager.calculate_dynamic_quota()
+    remaining_quota = dynamic_quota["safe_to_send_now"]
     if remaining_quota <= 0:
         raise HTTPException(
             status_code=429,
-            detail=f"Daily quota of {settings.daily_send_limit} emails reached for today. Try again tomorrow.",
+            detail=f"No safe quota remaining for bot today ({dynamic_quota['total_used_today']} used today, {dynamic_quota['otp_reserve_buffer']} strictly reserved for website OTPs).",
         )
 
     effective_limit = min(req.limit or 300, remaining_quota)

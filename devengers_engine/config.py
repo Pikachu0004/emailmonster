@@ -27,8 +27,10 @@ class Settings(BaseSettings):
     sender_email: str = Field(default="event@devengers.org", description="From address")
     reply_to_email: str = Field(default="support@devengers.org", description="Reply-To address")
 
-    # Quota & Rate Limiting (Hard Zoho 300/day limit protection)
-    daily_send_limit: int = Field(default=300, description="Max emails allowed per calendar day")
+    # Quota & Rate Limiting (Brevo 300/day limit + Website OTP protection)
+    daily_send_limit: int = Field(default=300, description="Total daily allowance across account")
+    otp_reserve_buffer: int = Field(default=10, description="Credits always reserved for website OTPs")
+    brevo_api_key: str = Field(default="", description="Brevo v3 API Key to sync live OTP credit usage")
     send_delay_seconds_min: float = Field(default=5.0, description="Minimum jitter delay between sends")
     send_delay_seconds_max: float = Field(default=10.0, description="Maximum jitter delay between sends")
     batch_size: int = Field(default=25, description="Number of emails before taking a longer breather")
