@@ -102,8 +102,13 @@ class DispatchRequest(BaseModel):
 
 @app.get("/health")
 async def health_check():
-    from zoneinfo import ZoneInfo
-    now_ist = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S IST")
+    try:
+        now_ist = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S IST")
+    except Exception:
+        from datetime import timezone, timedelta
+        ist_tz = timezone(timedelta(hours=5, minutes=30))
+        now_ist = datetime.now(ist_tz).strftime("%Y-%m-%d %H:%M:%S IST")
+
     return {
         "status": "online",
         "service": "Devengers Mail Engine",

@@ -36,7 +36,11 @@ class AutomatedScheduler:
             self.task.cancel()
 
     async def _scheduler_loop(self):
-        ist_tz = ZoneInfo("Asia/Kolkata")
+        try:
+            ist_tz = ZoneInfo("Asia/Kolkata")
+        except Exception:
+            from datetime import timezone, timedelta
+            ist_tz = timezone(timedelta(hours=5, minutes=30))
         target_hour = 18
         target_minute = 0
 
